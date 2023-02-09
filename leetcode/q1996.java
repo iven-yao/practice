@@ -1,3 +1,4 @@
+package leetcode;
 import java.util.Arrays;
 
 class q1996 {
