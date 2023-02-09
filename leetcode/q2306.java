@@ -63,7 +63,7 @@ public class q2306 {
     /*
      * try to optimize, using array instead of map => not working, almost the same
      *                  using list instead of set(since ideas are unique) => worse performance, very slow in getting intersection
-     *                  writing my own intersection => works!! Time spent improves from beat 65% to beat 82%
+     *                  writing my own intersection count => works!! Time spent improves from beat 65% to beat 82%
      */
     // public long distinctNames(String[] ideas) {
     //     Map<Character, Set<String>> alphabetMap = new HashMap<>();
