@@ -2,7 +2,7 @@ package oa;
 import java.lang.Math;
 
 public class GasStation {
-    
+
     public static int task1(int[] A, int X, int Y, int Z) {
         if(A.length == 0) return 0;
         int xx = 0,yy = 0,zz = 0;
@@ -55,8 +55,6 @@ public class GasStation {
       
       int[] C = {123,245,331,23,142,234,1,35,99};
       System.out.println("task1 = " + task1(C,999,990,993));
-
-      int[] D = {9,8,7,1,2,3};
 
       System.out.println("task2 = " + task2(6,20));
       System.out.println("task2 = " + task2(6,2000000000));
