@@ -2,6 +2,7 @@ package oa;
 import java.lang.Math;
 
 public class GasStation {
+    
     public static int task1(int[] A, int X, int Y, int Z) {
         if(A.length == 0) return 0;
         int xx = 0,yy = 0,zz = 0;
