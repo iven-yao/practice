@@ -24,37 +24,37 @@ public class q2415 {
     }
 
     // 20ms
-    // public TreeNode reverseOddLevels(TreeNode root) {
+    public TreeNode reverseOddLevelsSLOW(TreeNode root) {
         
-    //     boolean isEven = true;
-    //     Queue<TreeNode> currLevel = new LinkedList<>();
-    //     currLevel.add(root);
+        boolean isEven = true;
+        Queue<TreeNode> currLevel = new LinkedList<>();
+        currLevel.add(root);
 
-    //     while(currLevel.size() > 0) {
-    //         Queue<TreeNode> nextLevel = new LinkedList<>();
-    //         Stack<Integer> vals = new Stack<>();
-    //         while(currLevel.size() > 0) {
-    //             TreeNode node = currLevel.remove();
-    //             if(node.left != null) {
-    //                 nextLevel.add(node.left);
-    //                 vals.push(node.left.val);
-    //             } else break;
-    //             if(node.right != null) {
-    //                 nextLevel.add(node.right);
-    //                 vals.push(node.right.val);
-    //             } else break;
-    //         }
-    //         if(isEven) {
-    //             //next level value should be reversed:
-    //             for(TreeNode node: nextLevel) {
-    //                 node.val = vals.pop();
-    //             }
-    //         }
+        while(currLevel.size() > 0) {
+            Queue<TreeNode> nextLevel = new LinkedList<>();
+            Stack<Integer> vals = new Stack<>();
+            while(currLevel.size() > 0) {
+                TreeNode node = currLevel.remove();
+                if(node.left != null) {
+                    nextLevel.add(node.left);
+                    vals.push(node.left.val);
+                } else break;
+                if(node.right != null) {
+                    nextLevel.add(node.right);
+                    vals.push(node.right.val);
+                } else break;
+            }
+            if(isEven) {
+                //next level value should be reversed:
+                for(TreeNode node: nextLevel) {
+                    node.val = vals.pop();
+                }
+            }
 
-    //         currLevel = nextLevel;
-    //         isEven = !isEven;
-    //     }
+            currLevel = nextLevel;
+            isEven = !isEven;
+        }
         
-    //     return root;
-    // }
+        return root;
+    }
 }
