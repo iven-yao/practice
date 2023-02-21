@@ -1,4 +1,4 @@
-package oa;
+package interview;
 import java.lang.Math;
 
 public class GasStation {
@@ -47,17 +47,17 @@ public class GasStation {
     }
     
     public static void main(String args[]) {
-    //   int[] A = {2,8,4,3,2,1,1};
-    //   System.out.println("task1 = " + task1(A,7,11,3));
+        int[] A = {2,8,4,3,2};
+        System.out.println("task1 = " + task1(A,7,11,3));
       
     //   int[] B = {5};
     //   System.out.println("task1 = " + task1(B,4,0,3));
       
-      int[] C = {123,245,331,23,142,234,1,35,99};
-      System.out.println("task1 = " + task1(C,999,990,993));
+    //   int[] C = {123,245,331,23,142,234,1,35,99};
+    //   System.out.println("task1 = " + task1(C,999,990,993));
 
-      System.out.println("task2 = " + task2(6,20));
-      System.out.println("task2 = " + task2(6,2000000000));
+        System.out.println("task2 = " + task2(6,20));
+        System.out.println("task2 = " + task2(6,2000000000));
 
     }
 }
