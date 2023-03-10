@@ -23,4 +23,32 @@ public class q382 {
             return list.get(rand.nextInt(n));
         }
     }
+
+    class Solution1 {
+
+        int[] arr;
+        int n;
+        Random rand;
+        public Solution1(ListNode head) {
+            rand = new Random();
+            n = 0;
+            ListNode curr = head;
+            while(curr != null) {
+                n++;
+                curr = curr.next;
+            }
+    
+            arr = new int[n];
+            n = 0;
+            while(head != null) {
+                arr[n] = head.val;
+                head = head.next;
+                n++; 
+            }
+        }
+        
+        public int getRandom() {
+            return arr[rand.nextInt(n)];
+        }
+    }
 }
