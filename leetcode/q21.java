@@ -1,5 +1,4 @@
 package leetcode;
-import java.util.*;
 import node_definition.*;
 
 public class q21 {
