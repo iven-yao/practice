@@ -11,7 +11,6 @@ public class q826 {
             }
     
             Collections.sort(jobs, (a,b)->(a[0]-b[0]));
-            // System.out.println(jobs);
     
             Arrays.sort(worker);
     
