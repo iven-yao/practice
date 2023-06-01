@@ -1,5 +1,4 @@
 package interview;
-// TikTok 2022 Creative Tools Summer Intern Technical Interview First Round
 class Island {
     public static void main(String[] args){
         int[][] map = new int[][]{
