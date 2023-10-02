@@ -1,4 +1,4 @@
-# practiceteddy
+# practice
 just practices
 
 ## useful links:
