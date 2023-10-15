@@ -1,4 +1,4 @@
-package top150.SlidingWindow;
+package top150._03_SlidingWindow;
 
 public class q209 {
 
@@ -17,7 +17,7 @@ public class q209 {
 
         return min == Integer.MAX_VALUE? 0: min;
     }
-    
+
     // public int minSubArrayLen(int target, int[] nums) {
     //     int head = 0;
     //     int tail = 1;

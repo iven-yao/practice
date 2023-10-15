@@ -1,4 +1,4 @@
-package top150.TwoPointers;
+package top150._02_TwoPointers;
 
 import java.util.ArrayList;
 import java.util.Arrays;

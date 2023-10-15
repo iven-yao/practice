@@ -1,11 +1,11 @@
-package top150.SlidingWindow;
+package top150._03_SlidingWindow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class q30 {
-    
+
 
     //slow
     public List<Integer> findSubstring(String s, String[] words) {

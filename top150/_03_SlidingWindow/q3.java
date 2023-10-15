@@ -1,4 +1,4 @@
-package top150.SlidingWindow;
+package top150._03_SlidingWindow;
 
 public class q3 {
     public int lengthOfLongestSubstring(String s) {

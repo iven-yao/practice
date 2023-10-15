@@ -1,4 +1,4 @@
-package top150.TwoPointers;
+package top150._02_TwoPointers;
 
 public class q167 {
     public int[] twoSum(int[] numbers, int target) {
