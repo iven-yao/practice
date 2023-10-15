@@ -1,4 +1,4 @@
-package top150.ArrayString;
+package top150._01_ArrayString;
 
 public class q121 {
     public int maxProfit(int[] prices) {

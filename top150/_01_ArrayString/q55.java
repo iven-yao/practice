@@ -1,4 +1,4 @@
-package top150.ArrayString;
+package top150._01_ArrayString;
 // 55. Jump Game
 public class q55 {
     public boolean canJump(int[] nums) {

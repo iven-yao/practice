@@ -1,4 +1,4 @@
-package top150.ArrayString;
+package top150._01_ArrayString;
 // 169. Majority Element
 public class q169 {
     public int majorityElement(int[] nums) {

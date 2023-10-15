@@ -1,4 +1,4 @@
-package top150.ArrayString;
+package top150._01_ArrayString;
 
 public class q135 {
     public int candy(int[] ratings) {

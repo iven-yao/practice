@@ -1,4 +1,4 @@
-package top150.ArrayString;
+package top150._01_ArrayString;
 // 122. Best Time to Buy and Sell Stock II
 public class q122 {
     public int maxProfit(int[] prices) {
