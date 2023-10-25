@@ -500,6 +500,7 @@ class Solution128:
 
 # 228. Summary Ranges
 class Solution228:
+    # while loop
     # T: O(N)
     # S: O(1)
     def summaryRanges(self, nums):
@@ -509,6 +510,7 @@ class Solution228:
             return result
         l = 0
         r = 0
+        # l: consecutive start; r: consecutive end
         while r < n:
             while r+1 < n and nums[r]+1 == nums[r+1]:
                 r += 1
@@ -522,6 +524,7 @@ class Solution228:
             l = r
         return result
 
+    # for loop
     # T: O(N)
     # S: O(1)
     def summaryRanges(self, nums):
@@ -594,7 +597,10 @@ class Solution57():
                 result[-1][1] = max(result[-1][1], e)
         return result
 
+# 452. Minimum Number of Arrows to Burst Balloons
 class Solution452:
+    # T: O(NlogN)
+    # S: O(N)
     def findMinArrowShots(self, points):
         count = 1
         n = len(points)
@@ -701,6 +707,7 @@ class Solution150:
                     stack.append(int(first / second)) # truncate toward zero via change float into integer, works for positive and negative cases!
         return stack.pop()
 
+# 224. Basic Calculator
 class Solution:
     def calculate(self, s):
         num, sign, stack = 0, 1, [0]
@@ -815,6 +822,454 @@ class Solution:
                 elif board[i][j] == 'O':
                     board[i][j] = 'X'
 
+# =============== Linked List ===============
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+# 21. Merge Two Sorted Lists
+class Solution21:
+    def mergeTwoLists(self, list1, list2):
+        p1 = list1
+        p2 = list2
+        p = dummy = ListNode(0)
+        while p1 != None and p2 != None:
+            if p1.val <= p2.val:
+                p.next = p1
+                p1 = p1.next
+                p = p.next
+            else:
+                p.next = p2
+                p2 = p2.next
+                p = p.next
+        if p1 != None:
+            p.next = p1
+        if p2 != None:
+            p.next = p2
+        return dummy.next
+
+class Solution141:
+    # T: O(N)
+    # S: O(1)
+    def hasCycle(self, head):
+        slow = head
+        fast = head
+        while fast != None and fast.next != None: # bc need to avoid None.next error !
+        # while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+            if slow == fast:
+                return True
+        return False
+
+class Solution2:
+    def addTwoNumbers(self, l1, l2):
+        dummy = ListNode(0)
+        p = dummy
+        carry = 0
+        while l1 or l2 or carry:
+            if l1:
+                carry += l1.val
+                l1 = l1.next
+            if l2:
+                carry += l2.val
+                l2 = l2.next
+            p.next = ListNode(carry%10)
+            p = p.next
+            carry //= 10
+        return dummy.next
+
+class Solution206:
+    def reverseList(self, head):
+        prev = None
+        cur = head
+        while cur:
+            nxt = cur.next # store the next element befoe re-assign .next to prevent lose original next element
+            cur.next = prev
+            prev = cur
+            cur = nxt
+        return prev
+    
+    def reverseList(self, head):
+        cur = head
+        prev = None
+        while cur != None:
+            cur.next, prev, cur = prev, cur, cur.next
+            # prev, cur, cur.next = cur, cur.next, prev # 不能寫成這樣 -> 會有 None.next 的錯誤 => cur.next 要寫在前面
+        return prev
+
+# 83. Remove Duplicates from Sorted List 
+class Solution:
+    def deleteDuplicates(self, head):
+        cur = head
+        while cur and cur.next:
+            if cur.val == cur.next.val:
+                cur.next = cur.next.next
+            else:
+                cur = cur.next
+        return head
+
+# 82. Remove Duplicates from Sorted List II
+class Solution82:
+    # T: O(N)
+    # S: O(1)
+    def deleteDuplicates(self, head):
+        dummy = ListNode(0, head)
+        pre = dummy
+        cur = head
+        while cur:
+            if cur.next and cur.val == cur.next.val:
+                while cur.next and cur.val == cur.next.val:
+                    cur = cur.next
+                pre.next = cur.next # skip all duplicates
+            else:
+                pre = pre.next
+            cur = cur.next # move forward
+        return dummy.next
+
+# 1836. Remove Duplicates From an Unsorted Linked List
+class Solution1836:
+    # if multiple duplicates connect together -> skip at one time
+    # T: O(N)
+    # S: O(N), dict
+    def deleteDuplicatesUnsorted(self, head):
+        d = defaultdict(int)
+        cur = head
+        while cur:
+            d[cur.val] += 1
+            cur = cur.next
+
+        dummy = ListNode(0, head)
+        cur = head
+        pre = dummy
+        while cur:
+            if d[cur.val] > 1:
+                while cur and d[cur.val] > 1:
+                    cur = cur.next
+                pre.next = cur
+            else:
+                pre = pre.next
+                cur = cur.next
+        return dummy.next
+
+    # iterate one by one
+    # T: O(N)
+    # S: O(N), dict
+    def deleteDuplicatesUnsorted(self, head):
+        d = defaultdict(int)
+        cur = head
+        while cur:
+            d[cur.val] += 1
+            cur = cur.next
+
+        dummy = ListNode(0, head)
+        cur = head
+        pre = dummy
+        while cur:
+            if d[cur.val] > 1:
+                pre.next = cur.next
+            else:
+                pre = pre.next
+            cur = cur.next
+        return dummy.next
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseLinkedList(self, head, k):
+        new_head = None
+        cur = head
+        while k:
+            next_node = cur.next
+            cur.next = new_head
+            new_head = cur
+            cur = next_node
+            k -= 1
+        return new_head
+
+    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        count = 0
+        cur = head
+        while count < k and cur:
+            cur = cur.next
+            count += 1
+        if count == k:
+            reversedHead = self.reverseLinkedList(head, k)
+            head.next = self.reverseKGroup(cur, k)
+            return reversedHead
+        return head
+# 19. Remove Nth Node From End of List
+class Solution19:
+    # calculate total length of linked list
+    def removeNthFromEnd(self, head, n):
+        dummy = ListNode(0, head)
+        cur = head # set cur point to head for counting node number
+        count = 0
+        while cur:
+            count += 1
+            cur = cur.next
+        cur = dummy # for the case the removal node is the 1st node, we should set cur point to dummy node, but not head node
+        for i in range(count-n):
+            cur = cur.next
+
+		# after for loop, cur point to the parent of the removal node
+		# In this case, even though the removal node is the last node, there will not None.next error case
+        cur.next = cur.next.next 
+        return dummy.next
+    
+    # math, don't need to calculate total length of linked list
+    def removeNthFromEnd(self, head, n):
+        dummy = ListNode(0, head)
+        slow = head
+        fast = head
+        for _ in range(n):
+            fast = fast.next
+        if not fast:
+            return slow.next
+        while fast.next:
+            slow = slow.next
+            fast = fast.next
+		# after while loop, slow will point to the parent of the removal node
+        slow.next = slow.next.next
+        return dummy.next
+
+
+# 92. Reverse Linked List II
+class Solution92:
+    # while solution
+    def reverseBetween(self, head, left, right):
+        # dummy = ListNode(0)
+        # dummy.next = head
+        dummy = ListNode(0, head)
+        # 1st part
+        left_prev = dummy
+        cur = head
+        idx = 1
+        while idx != left:
+            left_prev = left_prev.next
+            cur = cur.next
+            idx += 1
+        
+        # 2nd part
+        prev = None
+        times = right - left + 1
+        right_prev = cur
+        # another method: right_prev = left_p.next
+        while times > 0:
+            nxt = cur.next
+            cur.next = prev
+            prev = cur
+            cur = nxt
+            times -= 1
+
+        left_prev.next = prev # 1st connect to 2rd
+        # 2nd connect to 3rd
+        right_prev.next = cur
+        
+        return dummy.next
+    
+    # For solution
+    def reverseBetween(self, head, left, right):
+        # dummy = ListNode(0)
+        # dummy.next = head
+        dummy = ListNode(0, head)
+        # 1st part
+        left_prev = dummy
+        cur = head
+        idx = 1
+        for i in range(left-1):
+            left_prev = left_prev.next
+            cur = cur.next
+
+        # 2nd part
+        prev = None
+        right_prev = cur
+        # right_prev = left_p.next
+        for i in range(right - left + 1):
+            nxt = cur.next
+            cur.next = prev
+            prev = cur
+            cur = nxt
+
+        left_prev.next = prev # 1st connect to 2rd
+        # 2nd connect to 3rd
+        right_prev.next = cur
+        
+        return dummy.next
+            
+
+# 61. Rotate List
+class Solution61:
+    # T: O(N)
+    # S: O(1)
+    def rotateRight(self, head, k):
+        if not head:
+            return head
+				
+        dummy = ListNode(0, head)
+        end_node = head
+        count = 1
+        while end_node.next:
+            count += 1
+            end_node = end_node.next
+        end_node.next = head
+        k %= count
+        new_end_node = dummy
+        new_start_node = head
+        for i in range(count-k):
+            new_end_node = new_end_node.next
+            new_start_node = new_start_node.next
+        new_end_node.next = None
+        return new_start_node
+            
+
+class Solution86:
+    # T: O(N)
+    # S: O(1)
+    def partition(self, head, x):
+        if not head:
+            return head
+
+        first_list_dummy = ListNode(0, head)
+        first_list_p = first_list_dummy
+        cur = head
+        second_list_dummy = ListNode(0, None)
+        second_list_p = second_list_dummy
+
+        while cur:
+            if cur.val >= x:
+                second_list_p.next = cur
+                second_list_p = second_list_p.next
+            else:
+                first_list_p.next = cur
+                first_list_p = first_list_p.next
+            cur = cur.next
+            
+        second_list_p.next = None
+        first_list_p.next = second_list_dummy.next
+        return first_list_dummy.next
+
+
+# 146. LRU Cache
+# method 1: collections.OrderedDict()
+from collections import OrderedDict
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        # a dict that remembers the order in that keys were first inserted.
+        self.d = collections.OrderedDict() # cannot set default type like collections.defaultdict(int)
+        self.c = capacity
+
+    # T: O(1)
+    def get(self, key: int) -> int:
+        if key in self.d.keys():
+            self.d.move_to_end(key)
+            return self.d[key]
+        else:
+            return -1
+
+    # T: O(1)
+    def put(self, key: int, value: int) -> None:
+        if key in self.d.keys():
+            self.d.move_to_end(key)
+        self.d[key] = value
+        if len(self.d) > self.c:
+            self.d.popitem(last=False)
+
+# method 2: doubly linked list (record the order) + hashmap (find val of the key in O(1))
+class Node:
+    def __init__(self, k, v):
+        self.key = k
+        self.val = v
+        self.prev = None
+        self.next = None
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.c = capacity
+        self.d = collections.defaultdict()
+        self.head = Node(0, None)
+        self.tail = Node(0, None)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    # remove node from the linked list
+    def _remove(self, node):
+        prev_node = node.prev
+        next_node = node.next
+
+        # prev_node and next_node
+        prev_node.next = next_node
+        next_node.prev = prev_node
+
+    # add node in the last of the linked list
+    def _insert(self, node):
+        prev_node = self.tail.prev
+
+        # prev_node and insert node
+        prev_node.next = node
+        node.prev = prev_node
+        # insert node and tail
+        node.next = self.tail
+        self.tail.prev = node
+
+    # T: O(1)
+    def get(self, key: int) -> int:
+        if key in self.d:
+            node = self.d[key]
+            self._remove(node)
+            self._insert(node)
+            return node.val
+        else:
+            return -1
+
+    # T: O(1)
+    def put(self, key: int, value: int) -> None:
+        if key in self.d:
+            self._remove(self.d[key])
+        self.d[key] = Node(key, value)
+        self._insert(self.d[key])
+
+        if len(self.d) > self.c:
+            lru_node = self.head.next
+            self._remove(lru_node)
+            del self.d[lru_node.key]
+
+
+# 138. Copy List with Random Pointer
+class Node:
+    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+
+class Solution:
+    def copyRandomList(self, head):
+        dummy = new = Node(0)
+        old_to_new = {}
+        cur = head
+        while cur:
+            new.next = Node(cur.val)
+            old_to_new[cur] = new.next
+            cur = cur.next
+            new = new.next
+        cur = head
+        new = dummy.next
+        while cur:
+            if cur.random:
+                new.random = old_to_new[cur.random]
+            cur = cur.next
+            new = new.next
+        return dummy.next
+
+
+        
+
 # =============== Binary Tree ===============
 
 # Definition for a binary tree node.
@@ -853,4 +1308,230 @@ class Solution: # This class contains the method for finding the lowest common a
 		'''
         if left or right:
             return left or right
+        
+# =============== Binary Tree BFS ===============
+# 199. Binary Tree Right Side View
+class Solution199:
+    def rightSideView(self, root):
+        result = []
+        if not root: 
+            return result
+        q = deque()
+        q.append(root)
+        while q:
+            n = len(q)
+            for i in range(n):
+                node = q.popleft()
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            result.append(node.val)
+            
+        return result
+    
+# 637. Average of Levels in Binary Tree
+class Solution637:
+    # T: O(N)
+    # S: O(M), M: nodes num in one layer
+    def averageOfLevels(self, root):
+        result = []
+        q = deque([root])
+        # q = deque()
+        # q.append(root)
+        while q:
+            level_sum = 0
+            n = len(q)
+            for _ in range(n):
+                node = q.popleft()
+                level_sum += node.val
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            result.append(level_sum/n)
+        return result
+
+
+
+# 102. Binary Tree Level Order Traversal
+class Solution102:
+    def levelOrder(self, root):
+        result = []
+        if not root:
+            return result
+        q = deque([root])
+        while q:
+            n = len(q)
+            level = []
+            for _ in range(n):
+                node = q.popleft()
+                level.append(node.val)
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            result.append(level)
+        return result
+
+# 103. Binary Tree Zigzag Level Order Traversal
+class Solution:
+    def zigzagLevelOrder(self, root):
+        result = []
+        if not root:
+            return result
+        q = deque([root])
+        order = -1
+        while q:
+            n = len(q)
+            order *= (-1)
+            level = []
+            for _ in range(n):
+                node = q.popleft()
+                level.append(node.val)
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            result.append(level[::order])
+        return result
+
+
+# =============== Graph BFS ===============
+
+# 433. Minimum Genetic Mutation
+class Solution433:
+    # original BFS w/ visited set
+    # T: O(B), B is the length of bank, because need to search if adj_node in bank, actually is 32*B nodes
+    # S: O(1), visited set store 32 nodes
+    def minMutation(self, startGene, endGene, bank):
+        if endGene not in bank:
+            return -1
+        if startGene == endGene:
+            return 0
+        level = 0
+        q = deque([(startGene, level)])
+        visited = set()
+        while q:
+            node, level = q.popleft()
+            visited.add(node)
+            if node == endGene:
+                return level
+            for i in range(len(startGene)):
+                for ch in 'ATCG':
+                    adj_node = node[:i] + ch + node[i+1:]
+                    if adj_node not in visited and adj_node in bank:
+                        q.append((adj_node, level+1))
+                        visited.add(adj_node)
+        return -1
+
+    # optimized BFS w/o visited set; instead, remove used gene combination in the bank 
+    # T: O(B), B is the length of bank, because need to search if adj_node in bank and bank.remove(adj_node)
+    # S: O(1), visited set store 32 nodes
+    def minMutation(self, startGene, endGene, bank):
+        if endGene not in bank:
+            return -1
+        if startGene == endGene:
+            return 0
+
+        level = 0
+        q = deque([(startGene, level)])
+        # visited = set()
+        while q:
+            node, level = q.popleft()
+            # visited.add(node)
+            if node == endGene:
+                return level
+            for i, ch in enumerate(node):
+                for gene in 'ATCG':
+                    if ch == gene:
+                        continue
+                    adj_node = node[:i] + gene + node[i+1:]
+                    if adj_node in bank: # O(B), gradually smaller after remove
+                        q.append((adj_node, level+1))
+                        bank.remove(adj_node) # O(B), bank list gradually become smaller
+                        # visited.add(adj_node)
+        return -1
+# 547. Number of Provinces
+class Solution547:
+    # with graph dict
+    # T: O(N^2)
+    # S: O(N)
+    def findCircleNum(self, isConnected):
+        count = 0
+        n = len(isConnected)
+        q = deque()
+        visited = set()
+        graph = defaultdict(list)
+        for i in range(n):
+            for j in range(i+1, n):
+                if isConnected[i][j] == 1:
+                    graph[i].append(j)
+                    graph[j].append(i)
+
+        def bfs(node):
+            q.append(node)
+            while q:
+                node = q.popleft()
+                visited.add(node)
+                for adj_node in graph[node]:
+                    if adj_node not in visited:
+                        q.append(adj_node)
+                        visited.add(adj_node)
+
+        for i in range(n):
+            if i not in visited:
+                bfs(i)
+                count += 1
+        return count
+    
+    # no graph dict, refer original input isConnected, ex: isConnected[node][adj_node]
+    # T: O(N^2)
+    # S: O(N)
+    def findCircleNum(self, isConnected):
+        count = 0
+        n = len(isConnected)
+        q = deque()
+        visited = set()
+        def bfs(node):
+            q.append(node)
+            while q:
+                node = q.popleft()
+                visited.add(node)
+                for adj_node in range(n):
+                    if isConnected[node][adj_node] == 1 and adj_node not in visited:
+                        q.append(adj_node)
+                        visited.add(adj_node)
+
+        for i in range(n):
+            if i not in visited:
+                bfs(i)
+                count += 1
+        return count
+
+# 1926. Nearest Exit from Entrance in Maze
+class Solution:
+    # T: O(M*N)
+    # S: O(M*N)
+    def nearestExit(self, maze, entrance):
+        m = len(maze)
+        n = len(maze[0])
+        steps = 0
+        start_x, start_y = entrance
+        q = deque([(start_x, start_y, steps)])
+        dirs = [(1,0), (-1,0), (0,1), (0,-1)]
+        visited = set()
+        while q:
+            i, j, steps = q.popleft()
+            visited.add((i,j))
+            if [i,j] != entrance and (i == 0 or i == m-1 or j == 0 or j == n-1):
+            # or if levels != 0 and ....
+                return steps
+            for dx, dy in dirs:
+                new_x = i + dx
+                new_y = j + dy
+                if 0 <= new_x < m and 0 <= new_y < n and maze[new_x][new_y] == '.' and (new_x, new_y) not in visited:
+                    q.append((new_x, new_y, steps+1))
+                    visited.add((new_x, new_y))
+        return -1
         

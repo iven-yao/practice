@@ -1,5 +1,5 @@
 
-from solution import *
+from python_solution import *
 
 sol383 = Solution383()
 sol205 = Solution205()
@@ -76,4 +76,22 @@ assert_test()
 assert expected_matrix == input_matrix
 assert [[7,4,1],[8,5,2],[9,6,3]] == [[7,4,1],[8,5,2],[9,6,3]]
 
+sol21 = Solution21()
+list1 = ListNode(1)
+list1.next = ListNode(2)
+list1.next.next = ListNode(4)
+list2 = ListNode(1)
+list2.next = ListNode(3)
+list2.next.next = ListNode(4)
+assert sol21.mergeTwoLists(list1, list2)
+
+sol141 = Solution141()
+head = ListNode(3)
+cycle = ListNode(2)
+cycle.next = ListNode(0)
+cycle.next.next = ListNode(-4)
+cycle.next.next.next = cycle
+head.next = cycle
+print('>>>>', sol141.hasCycle(head))
+assert sol141.hasCycle(head) == True
 # sol48.rotate([[1,2,3],[4,5,6],[7,8,9]])
