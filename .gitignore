@@ -1,4 +1,4 @@
-.vscode directory
-__pycache__ directory
+.vscode
+__pycache__
 .DS_Store
 top150/.DS_Store
