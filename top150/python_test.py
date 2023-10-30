@@ -92,6 +92,5 @@ cycle.next = ListNode(0)
 cycle.next.next = ListNode(-4)
 cycle.next.next.next = cycle
 head.next = cycle
-print('>>>>', sol141.hasCycle(head))
 assert sol141.hasCycle(head) == True
 # sol48.rotate([[1,2,3],[4,5,6],[7,8,9]])

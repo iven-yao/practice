@@ -2,6 +2,8 @@ import collections
 from collections import defaultdict
 import bisect
 from collections import deque
+import math
+
 # =============== Sliding Window ===============
 
 # 209. Miniize Size Subarray Sum
@@ -923,6 +925,8 @@ class Solution82:
                 while cur.next and cur.val == cur.next.val:
                     cur = cur.next
                 pre.next = cur.next # skip all duplicates
+                # although current cur pointer might point to a new duplicate num
+                # in the next while loop, we will still go into if statement, and reconnect it to the right next num
             else:
                 pre = pre.next
             cur = cur.next # move forward
@@ -973,11 +977,7 @@ class Solution1836:
                 pre = pre.next
             cur = cur.next
         return dummy.next
-# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
+
 class Solution:
     def reverseLinkedList(self, head, k):
         new_head = None
@@ -990,7 +990,7 @@ class Solution:
             k -= 1
         return new_head
 
-    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+    def reverseKGroup(self, head, k):
         count = 0
         cur = head
         while count < k and cur:
@@ -1001,6 +1001,7 @@ class Solution:
             head.next = self.reverseKGroup(cur, k)
             return reversedHead
         return head
+    
 # 19. Remove Nth Node From End of List
 class Solution19:
     # calculate total length of linked list
@@ -1027,12 +1028,13 @@ class Solution19:
         fast = head
         for _ in range(n):
             fast = fast.next
-        if not fast:
+        if not fast: # 1st node removal case
             return slow.next
         while fast.next:
             slow = slow.next
             fast = fast.next
 		# after while loop, slow will point to the parent of the removal node
+        # slow and fast point keep diff by n
         slow.next = slow.next.next
         return dummy.next
 
@@ -1055,11 +1057,11 @@ class Solution92:
         
         # 2nd part
         prev = None
-        times = right - left + 1
+        times = right - left + 1 # ex: 2->3->4, process 2->None, 3->2, 4->3, => 3 times
         right_prev = cur
         # another method: right_prev = left_p.next
         while times > 0:
-            nxt = cur.next
+            nxt = cur.next 
             cur.next = prev
             prev = cur
             cur = nxt
@@ -1274,12 +1276,76 @@ class Solution:
 
 # Definition for a binary tree node.
 class TreeNode: #  This class defines a simple binary tree node structure with three attributes:
-    def __init__(self, x):
-        self.val = x
-        self.left = None
-        self.right = None
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
-class Solution: # This class contains the method for finding the lowest common ancestor of two nodes in a binary tree.
+# 104. Maximum Depth of Binary Tree
+class Solution104:
+    # Recursion
+    # T: O(N)
+    # S: O(N), if the tree is unbalanced
+    def maxDepth(self, root):
+        if not root:
+            return 0
+        return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))
+    
+    # Iteration BFS
+    # T: O(N)
+    # S: O(D), D: number of nodes in one layer, maximum: store 2D number of nodes in queue
+    def maxDepth(self, root):
+        if not root:
+            return 0
+        level = 1
+        q = deque([(root, level)])
+        while q:
+            n = len(q) 
+            for _ in range(n):
+                node, level = q.popleft()
+                if node.left:
+                    q.append((node.left, level+1))
+                if node.right:
+                    q.append((node.right, level+1))
+        return level
+
+
+
+# 100. Same Tree
+class Solution100:
+    # Recursion
+    # T: O(N)
+    # S: O(N), if the tree is unbalanced
+    def isSameTree(self, p, q):
+        if not p and not q:
+            return True
+        if not p or not q:
+            return False
+        if p.val != q.val:
+            return False
+        return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)
+
+    # Iteration BFS
+    # T: O(N)
+    # S: O(D), D: number of nodes in one layer, maximum: store 2D number of nodes in queue
+    def isSameTree(self, p, q):
+        deq = deque([(p, q)])
+        while deq:
+            p_node, q_node = deq.popleft()
+            if not p_node and not q_node:
+                continue
+            if not p_node or not q_node:
+                return False
+            # if execute to here, it means p_node!=None and q_node!=None
+            # Thus, below code can use these 2 nodes to refer .left or .right; don't need to pre-check to prevent None.left or None.right error
+            if p_node.val != q_node.val:
+                return False
+            deq.append([p_node.left, q_node.left])
+            deq.append([p_node.right, q_node.right])
+        return True
+    
+# 236. Lowest Common Ancestor of a Binary Tree
+class Solution236: # This class contains the method for finding the lowest common ancestor of two nodes in a binary tree.
     # Recursive
     def lowestCommonAncestor(self, root, p, q): # The method takes three arguments:
         # recursive base case 1
@@ -1308,7 +1374,243 @@ class Solution: # This class contains the method for finding the lowest common a
 		'''
         if left or right:
             return left or right
+
+
+
+# 226. Invert Binary Tree
+class Solution226:
+    # Recursion: invert the left lowest node first, and then invert postorderly
+    # T: O(N)
+    # S: O(H), worst case: O(N)
+    #   2
+    #  / \
+    # 1  3
+    # Recusive to root 2
+    #   Recusive to root 1
+    #       left = None; right = None => exchange => return root 1 (inverted version)
+    #   Recusive to root 3
+    #       left = None; right = None => exchange => return root 3 (inverted version)
+    #   left = 1; right = 3 => exchange TreeNode(2).left = TreeNode(3); TreeNode(2).right = TreeNode(1) => return root 2 (inverted version)
+    def invertTree(self, root):
+        if not root:
+            return root
+        left = self.invertTree(root.left)
+        right = self.invertTree(root.right)
+        root.left = right
+        root.right = left
+        return root
+    
+    # Iteration: invert upper layer to lower layer
+    # T: O(N)
+    # S: O(D), worst case: O(N)
+    def invertTree(self, root):
+        if not root:
+            return root
+        q = collections.deque([root])
+        while q:
+            node = q.popleft()
+            node.left, node.right = node.right, node.left
+            if node.left:
+                q.append(node.left)
+            if node.right:
+                q.append(node.right)
+        return root
+    
+# 101. Symmetric Tree
+class Solution101:
+    # Recursion
+    # T: O(N)
+    # S: O(H), worst case: O(N)
+    def isSymmetric(self, root):
+        return self.check(root.left, root.right)
+
+    def check(self, t1, t2):
+        if not t1 and not t2:
+            return True
+        if not t1 or not t2:
+            return False
+        if t1.val != t2.val:
+            return False
+        return self.check(t1.left, t2.right) and self.check(t1.right, t2.left)
+    
+    # Iteration
+    # T: O(N)
+    # S: O(D), worst case: O(N)
+    def isSymmetric(self, root):
+        q = collections.deque([(root.left, root.right)])
+        while q:
+            t1, t2 = q.popleft()
+            if not t1 and not t2:
+                continue
+            if not t1 or not t2:
+                return False
+            if t1.val != t2.val:
+                return False
+            q.append([t1.left, t2.right])
+            q.append([t1.right, t2.left])
+        return True   
+
+    
+# 222. Count Complete Tree Nodes
+class Solution222:
+    # Recursion - 1
+    # T: O(N)
+    # S: O(H), worst case: O(N)
+    def countNodes(self, root):
+        if not root:
+            return 0
+        if not root.left and not root.right:
+            return 1
+        return 1 + self.countNodes(root.left) + self.countNodes(root.right)
+    
+    # Recursion - 2
+    def countNodes(self, root):
+        return 1 + self.countNodes(root.right) + self.countNodes(root.left) if root else 0
+    
+    # Iteration
+    # T: O(N)
+    # S: O(D), worst case: O(N)
+    def countNodes(self, root):
+        count = 0
+        if not root:
+            return count
+        q = collections.deque([root])
+        while q:
+            node = q.popleft()
+            count += 1
+            if node.left:
+                q.append(node.left)
+            if node.right:
+                q.append(node.right)
+        return count
+
+
+
+# 129. Sum Root to Leaf Numbers
+class Solution129:
+    def sumNumbers(self, root: TreeNode):
+        result = 0
+
+        def dfs(node, cur_total):
+            nonlocal result
+            if not node:
+                return
+            else:
+                cur_total = 10*cur_total + node.val
+                if not node.left and not node.right: # bottom leaf node
+                    result += cur_total
+                    return
+                else:
+                    dfs(node.left, cur_total)
+                    dfs(node.right, cur_total)
+
         
+        dfs(root, 0)
+        return result
+
+# 173. Binary Search Tree Iterator
+class BSTIterator:
+    def __init__(self, root):
+        self.stack = list()
+        self.pushAll(root)
+
+    def hasNext(self):
+        return self.stack
+
+    def next(self):
+        tmpNode = self.stack.pop()
+        self.pushAll(tmpNode.right)
+        return tmpNode.val
+        
+    def pushAll(self, node):
+        while node is not None:
+            self.stack.append(node)
+            node = node.left
+
+# 106. Construct Binary Tree from Inorder and Postorder Traversal
+class Solution106:
+    def buildTree(self, inorder, postorder):
+        if not inorder or not postorder:
+            return None
+        
+        root = TreeNode(postorder.pop())
+        inorderIndex = inorder.index(root.val)
+
+        root.right = self.buildTree(inorder[inorderIndex+1:], postorder)
+        root.left = self.buildTree(inorder[:inorderIndex], postorder)
+
+        return root
+
+# 105. Construct Binary Tree from Preorder and Inorder Traversal
+class Solution105:
+    def buildTree(self, preorder, inorder):
+        if not preorder or not inorder:
+            return None
+        root_val = preorder[0]
+        mid = inorder.index(root_val)
+        root = TreeNode(root_val)
+        root.left = self.buildTree(preorder[1:mid+1], inorder[:mid])
+        root.right = self.buildTree(preorder[mid+1:], inorder[mid+1:])
+        return root
+    
+# 114. Flatten Binary Tree to Linked List
+class Solution114:
+    # Use self.prev to recode the ordered tree of the right part of current node.
+    # Remove the left part of current node  
+    '''
+       root
+       / 
+      1 
+     / \ 
+    3  4  
+    Node(4).right = None
+    Node(4).left = None
+    prev = Node(4)
+    ----------------------------------------------------
+    Node(3).right = Node(4) (prev)
+    Node(3).left = None
+    prev = Node(3)->Node(4)
+    ----------------------------------------------------
+    Node(1).right = prev = Node(3) -> Node(4)
+    Node(1).left = None
+    prev = Node(1)->Node(3)->Node(4) => answer
+    '''
+    def __init__(self):
+        self.prev = None
+
+    def flatten(self, root):
+        """
+        Do not return anything, modify root in-place instead.
+        """
+        if not root:
+            return root
+        self.flatten(root.right)
+        self.flatten(root.left)
+        root.right = self.prev
+        root.left = None
+        self.prev = root
+
+# 124. Binary Tree Maximum Path Sum
+class Solution124:
+    def maxPathSum(self, root):
+        if not root:
+            return 0
+        result = -float('inf')
+        def dfs(node):
+            nonlocal result
+            if not node:
+                return 0
+            left_max = max(0, dfs(node.left))
+            right_max = max(0, dfs(node.right))
+
+            result = max(result, node.val + left_max + right_max)
+            return node.val + max(left_max, right_max)
+        
+        dfs(root)
+        return result
+
+
+
 # =============== Binary Tree BFS ===============
 # 199. Binary Tree Right Side View
 class Solution199:
@@ -1535,3 +1837,61 @@ class Solution:
                     visited.add((new_x, new_y))
         return -1
         
+# 17. Letter Combinations of a Phone Number
+# dfs func write inside main func
+class Solution17:
+    def letterCombinations(self, digits):
+        result = []
+        if not digits:
+            return result
+        d = {'2':'abc', '3':'def', '4':'ghi', '5':'jkl', '6':'mno', '7':'pqrs', '8':'tuv', '9':'wxyz'}
+        n = len(digits)
+        
+        def backtrack(cur_idx, comb):
+            if len(comb) == n:
+                result.append(comb)
+                return
+            else:
+                for ch in d[digits[cur_idx]]:
+                    backtrack(cur_idx+1, comb+ch)
+        backtrack(0, '')
+        return result
+
+# dfs func write outside main func
+class Solution17:
+    def letterCombinations(self, digits):
+        result = []
+        if not digits:
+            return result
+        d = {'2':'abc', '3':'def', '4':'ghi', '5':'jkl', '6':'mno', '7':'pqrs', '8':'tuv', '9':'wxyz'}
+        
+        self.backtrack(digits, d, 0, '', result)
+        return result
+
+    def backtrack(self, digits, d, cur_idx, comb, result):
+        if len(comb) == len(digits):
+            result.append(comb)
+            return
+        else:
+            for ch in d[digits[cur_idx]]:
+                self.backtrack(digits, d, cur_idx+1, comb+ch, result)
+
+
+# =============== Binary Search ===============
+class Solution2300:
+    # Notice that if a spell and potion pair is successful, then the spell and all stronger potions will be successful too.
+    # sort potions, and do BS
+    # T: O(NlogN)
+    # S: O(M)
+    def successfulPairs(self, spells, potions, success):
+        n = len(spells)
+        m = len(potions)
+        potions.sort() # MlogM
+        result = []
+		# NlogM
+        for i in range(n):
+            needed_num = math.ceil(success / spells[i])
+            idx = bisect.bisect_left(potions, needed_num)
+            result.append(m-idx)      
+        return result
+
