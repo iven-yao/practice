@@ -2,3 +2,4 @@
 __pycache__
 .DS_Store
 top150/.DS_Store
+node_modules
