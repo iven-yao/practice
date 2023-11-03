@@ -3,18 +3,25 @@
 #### Graph vs Tree
 
 #### Tree vs Binary Tree
-- traverse order
+- traverse
+  - inorder
+  - preorder
+  - postorder 
 
 #### Binary Tree vs Binary Search Tree
-- constraints
+- constraints:
 
 #### Complete Binary Tree vs Full Binary Tree vs Perfect Binary Tree
-- definitions
+- definitions:
 
 #### Heap
-- insert
-- extract
+- insert: O(logN)
+- extract: O(logN)
 
 #### Trie (Prefix Tree)
 
 #### Graph
+- traverse
+  - DFS
+  - BFS
+  - BiDirectional
