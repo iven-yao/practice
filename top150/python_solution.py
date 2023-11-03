@@ -3,6 +3,41 @@ from collections import defaultdict
 import bisect
 from collections import deque
 import math
+from math import factorial
+from itertools import product
+
+# =============== Array ===============
+class Solution238:
+    # T: O(N)
+    # S: O(N)
+    def productExceptSelf(self, nums):
+        n = len(nums)
+        left = [1] * n
+        right = [1] * n
+        result = [1] * n
+        for i in range(1, n):
+            left[i] = left[i-1] * nums[i-1]
+        for j in range(n-2, -1, -1):
+            right[j] = right[j+1] * nums[j+1]
+        for k in range(n):
+            result[k] = left[k] * right[k]
+        return result
+    
+    # T: O(N)
+    # S: O(1)
+    def productExceptSelf(self, nums):
+        n = len(nums)
+        result = [1] * n
+        R = 1
+        for i in range(1, n): # as previous method, but store it in result array
+            result[i] = result[i-1] * nums[i-1]
+        for i in range(n-1, -1, -1):
+            result[i] = result[i] * R
+            R *= nums[i]
+        return result
+
+
+
 
 # =============== Sliding Window ===============
 
@@ -1354,10 +1389,10 @@ class Solution236: # This class contains the method for finding the lowest commo
         # recursive base case 2
         # start from the root, bc root is always the common ancestor of all nodes in the tree, although it might not be the "lowest" common ancestor
         # if what we want to find: p or q is in the root -> we return the root because the root is the lowest common ancestor.
-        if root == p or root == q:
+        if root == p or root == q: # if we find p node or q node is the same as current root node
             return root
 
-        left = right = None
+        left = right = None # left, right is TreeNode type
         left = self.lowestCommonAncestor(root.left, p, q)
         right = self.lowestCommonAncestor(root.right, p, q)
         
@@ -1374,8 +1409,23 @@ class Solution236: # This class contains the method for finding the lowest commo
 		'''
         if left or right:
             return left or right
-
-
+        
+# 117. Populating Next Right Pointers in Each Node II
+class Solution117:
+    def connect(self, root):
+        node = root
+        while node:
+            curr = dummy = Node(0)
+            while node:
+                if node.left:
+                    curr.next = node.left
+                    curr = curr.next
+                if node.right:
+                    curr.next = node.right
+                    curr = curr.next
+                node = node.next
+            node = dummy.next
+        return root
 
 # 226. Invert Binary Tree
 class Solution226:
@@ -1495,14 +1545,13 @@ class Solution129:
             nonlocal result
             if not node:
                 return
-            else:
-                cur_total = 10*cur_total + node.val
-                if not node.left and not node.right: # bottom leaf node
-                    result += cur_total
-                    return
-                else:
-                    dfs(node.left, cur_total)
-                    dfs(node.right, cur_total)
+            
+            cur_total = 10*cur_total + node.val
+            if not node.left and not node.right: # bottom leaf node
+                result += cur_total
+                return
+            dfs(node.left, cur_total)
+            dfs(node.right, cur_total)
 
         
         dfs(root, 0)
@@ -1528,6 +1577,8 @@ class BSTIterator:
             node = node.left
 
 # 106. Construct Binary Tree from Inorder and Postorder Traversal
+# T: O(N)
+# S: O(N)
 class Solution106:
     def buildTree(self, inorder, postorder):
         if not inorder or not postorder:
@@ -1542,6 +1593,8 @@ class Solution106:
         return root
 
 # 105. Construct Binary Tree from Preorder and Inorder Traversal
+# T: O(N)
+# S: O(N)
 class Solution105:
     def buildTree(self, preorder, inorder):
         if not preorder or not inorder:
@@ -1553,16 +1606,50 @@ class Solution105:
         root.right = self.buildTree(preorder[mid+1:], inorder[mid+1:])
         return root
     
+# 112. Path Sum
+class Solution112:
+    # Recursion 
+    def hasPathSum(self, root, targetSum):
+        if not root:
+            return False
+        if not root.left and not root.right and targetSum - root.val == 0:
+            return True
+        else:
+            ret1 = self.hasPathSum(root.left, targetSum-root.val)
+            ret2 = self.hasPathSum(root.right, targetSum-root.val)
+            return ret1 or ret2
+        
+
+# 113. Path Sum II
+class Solution113:
+    def pathSum(self, root, targetSum):
+        if not root:
+            return []
+        
+        def dfs(node, targetSum, path):
+            if not node.left and not node.right and targetSum == 0:
+                result.append(path)
+            if node.left:
+                dfs(node.left, targetSum-node.left.val, path+[node.left.val])
+            if node.right:
+                dfs(node.right, targetSum-node.right.val, path+[node.right.val])
+
+        result = []
+        dfs(root, targetSum-root.val, [root.val])
+        return result
+
+
+        
 # 114. Flatten Binary Tree to Linked List
 class Solution114:
+    # right -> left -> middle
     # Use self.prev to recode the ordered tree of the right part of current node.
     # Remove the left part of current node  
     '''
-       root
-       / 
+     root
       1 
      / \ 
-    3  4  
+    3   4  
     Node(4).right = None
     Node(4).left = None
     prev = Node(4)
@@ -1586,9 +1673,9 @@ class Solution114:
             return root
         self.flatten(root.right)
         self.flatten(root.left)
-        root.right = self.prev
+        root.right = self.prev # connect to previous right-ordered linked list
         root.left = None
-        self.prev = root
+        self.prev = root # remember current right-ordered linked list
 
 # 124. Binary Tree Maximum Path Sum
 class Solution124:
@@ -1596,6 +1683,8 @@ class Solution124:
         if not root:
             return 0
         result = -float('inf')
+
+        # without fork
         def dfs(node):
             nonlocal result
             if not node:
@@ -1603,7 +1692,7 @@ class Solution124:
             left_max = max(0, dfs(node.left))
             right_max = max(0, dfs(node.right))
 
-            result = max(result, node.val + left_max + right_max)
+            result = max(result, node.val + left_max + right_max) # with fork
             return node.val + max(left_max, right_max)
         
         dfs(root)
@@ -1754,6 +1843,38 @@ class Solution433:
                         bank.remove(adj_node) # O(B), bank list gradually become smaller
                         # visited.add(adj_node)
         return -1
+    
+# 127. Word Ladder    
+class Solution127:
+    def ladderLength(self, beginWord, endWord, wordList):
+        count = 0
+        if not beginWord or not endWord or beginWord == endWord or endWord not in wordList or len(beginWord) != len(endWord):
+            return count
+
+        graph = collections.defaultdict(list) # key: word with *; value: list (words in it are original word)
+        n = len(beginWord)
+        for w in wordList:
+            for i in range(n):
+                star_word = w[:i] + '*' + w[i+1:]
+                graph[star_word].append(w)
+        visited = set()
+        count = 1
+        q = collections.deque([(beginWord, count)])
+        while q:
+            node, count = q.popleft()
+            visited.add(node)
+            if node == endWord:
+                return count
+            for i in range(len(node)):
+                star_word = node[:i] + '*' + node[i+1:]
+                if star_word in graph.keys():
+                    for adj_word in graph[star_word]:  
+                        if adj_word not in visited:
+                            q.append((adj_word, count+1))
+                            visited.add(adj_word)
+        return 0        
+
+    
 # 547. Number of Provinces
 class Solution547:
     # with graph dict
@@ -1811,8 +1932,285 @@ class Solution547:
                 count += 1
         return count
 
-# 1926. Nearest Exit from Entrance in Maze
+# =============== Graph General ===============
+# 200. Number of Islands
+class Solution200:
+    def numIslands(self, grid):
+        count = 0
+        dirs = [(1,0), (-1,0), (0,1), (0,-1)]
+        q = collections.deque()
+        visited = set()
+
+        def bfs(i, j):
+            q.append((i,j))
+            while q:
+                x, y = q.popleft()
+                visited.add((x, y))
+                for dx, dy in dirs:
+                    new_x = x + dx
+                    new_y = y + dy
+                    if 0 <= new_x < m and 0 <= new_y < n and grid[new_x][new_y] == '1' and (new_x, new_y) not in visited:
+                        q.append((new_x, new_y))
+                        visited.add((new_x, new_y))
+
+        m = len(grid)
+        n = len(grid[0])
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == '1' and (i, j) not in visited:
+                    count += 1
+                    bfs(i, j)
+        return count
+
 class Solution:
+    def solve(self, board):
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        m = len(board)
+        n = len(board[0])
+        start = []
+        dirs = [(1,0), (-1,0), (0,1), (0,-1)]
+        for i in range(m):
+            for j in [0, n-1]:
+                if board[i][j] == 'O':
+                    start.append((i, j))
+        for i in [0, m-1]:
+            for j in range(n):
+                if board[i][j] == 'O': # use thie to optimize, although we only store start points at start array, but the start points might be changed 
+                    start.append((i, j))
+        '''
+        start = list(product(range(m), [0, n-1]))
+        start += list(product([0, m-1], range(n)))
+        '''
+        def bfs(i, j):
+            q = collections.deque([(i, j)])
+            while q:
+                x, y = q.popleft()
+                board[x][y] = 'B'
+                for dx, dy in dirs:
+                    new_x = x + dx
+                    new_y = y + dy
+                    if 0 <= new_x < m and 0 <= new_y < n and board[new_x][new_y] == 'O':
+                        q.append((new_x, new_y))
+                        board[new_x][new_y] = 'B'
+
+        for x, y in start:
+            if board[x][y] == 'O':
+                bfs(x, y)
+                
+        for i in range(m):
+            for j in range(n):
+                if board[i][j] == 'O':
+                    board[i][j] = 'X'
+                elif board[i][j] == 'B':
+                    board[i][j] = 'O'
+
+
+
+# 399. Evaluate Division
+class Solution399:
+    # BFS without helper function
+    # N be the number of input equations; M be the number of queries.
+    # T: O(M*N)
+    # S: O(N)
+    def calcEquation(self, equations, values, queries):
+        graph = defaultdict(list)
+        # T: O(N)
+        for (a, b), v in zip(equations, values):
+            graph[a].append((b, v))
+            graph[b].append((a, 1/v))
+
+        result = []
+        for idx, (s, e) in enumerate(queries): # O(M)
+            if a == b:
+                result.append(1.0)
+                continue
+            if s not in graph or e not in graph:
+                result.append(-1.0)
+                continue
+            q = collections.deque([(s, 1)])
+            visited = set()
+            while q: # For each query, traverse the graph. Worst case: traverse the entire graph -> O(N)
+                cur_node, cur_prod = q.popleft()
+                if cur_node == e:
+                    result.append(cur_prod)
+                    break
+                for adj_node, val in graph[cur_node]:
+                    if adj_node not in visited:
+                        q.append((adj_node, cur_prod*val))
+                        visited.add(adj_node)
+            if len(result) != idx+1: # for case if s & e both in graph dict, but s cannot reach to e
+                result.append(-1)
+        return result
+
+
+# 207. Course Schedule      
+class Solution207:
+    # Topological Sort Using Kahn's Algorithm
+    # T: O(M+N), N: number of courses; M: size of prerequisites.
+    # S: O(M+N)
+    def canFinish(self, numCourses, prerequisites):
+        graph = defaultdict(list)
+        indegree = defaultdict(int) 
+        # can be stored as array, too. array index: course number, the integer stored in its index: indegree number of courses (which is how many number of couses need to take before the index course)
+        
+        for a, b in prerequisites: # T: O(M)
+            graph[b].append(a)
+            indegree[a] += 1
+
+        visited = set()
+        q = deque()
+        for node in range(numCourses): # T: O(N)
+            if indegree[node] == 0:
+                q.append(node)
+                
+        while q:
+            node = q.popleft()
+            visited.add(node)
+            for adj_node in graph[node]: # T: Worst case: O(M) edges
+                indegree[adj_node] -= 1
+                if indegree[adj_node] == 0:
+                    q.append(adj_node)
+                    visited.add(adj_node)
+        return len(visited) == numCourses
+
+# 210. Course Schedule II
+class Solution210:
+    def findOrder(self, numCourses, prerequisites):
+        graph = collections.defaultdict(list)
+        indegree = [0] * numCourses
+        for a, b in prerequisites:
+            graph[b].append(a)
+            indegree[a] += 1
+
+        q = collections.deque()
+        visited = set()
+        result = []
+        for node in range(numCourses):
+            if indegree[node] == 0:
+                q.append(node)
+        
+        while q:
+            node = q.popleft()
+            result.append(node)
+            for adj_node in graph[node]:
+                indegree[adj_node] -= 1
+                if indegree[adj_node] == 0:
+                    q.append(adj_node)
+        return result if len(result) == numCourses else []
+
+
+
+# =============== Binary Search Tree (BST) ===============
+class Solution530:
+    # use extra list to store inordered node value
+    # T: O(N)
+    # S: O(N), bc list and recursion stack
+    def getMinimumDifference(self, root):
+        
+        def inorder(node):
+            if not node:
+                return []
+            return inorder(node.left) + [node.val] + inorder(node.right)
+
+        result = float('inf')
+        nodes_arr = inorder(root)
+        n = len(nodes_arr)
+        for i in range(1, n):
+            if nodes_arr[i] - nodes_arr[i-1] < result:
+                result = nodes_arr[i] - nodes_arr[i-1]
+        return result
+
+    # Not use extra list to store inordered node value, use self.prev to store
+    # T: O(N)
+    # S: O(N), bc recursion stack
+    def getMinimumDifference(self, root):
+        self.result = float('inf')
+        self.prev = None
+
+        def inorder(node):
+            if node == None:
+                return
+            inorder(node.left)
+            if self.prev != None: # need to write like this, cannot writ only: if self.prev: bc might have case is the first previous node is 0
+                self.result = min(self.result, node.val-self.prev)
+            self.prev = node.val
+            inorder(node.right)
+        
+        inorder(root)
+        return self.result
+
+
+# 230. Kth Smallest Element in a BST
+class Solution:
+    # Recursion -- inorder template, and find the result after inorder function
+    # T: O(N)
+    # S: O(N)
+    def kthSmallest(self, root, k):
+        def inorder(node):
+            if not node:
+                return []
+            return inorder(node.left) + [node.val] + inorder(node.right)
+        return inorder(root)[k-1]
+
+    # Recursion -- update result within inorder function
+    # T: O(N)
+    # S: O(logN) or O(N)
+    def kthSmallest(self, root, k):
+        self.count = 0
+        self.result = None
+        def inorder(node):
+            if not node:
+                return
+            inorder(node.left)
+            self.count += 1
+            if self.count == k:
+                self.result = node.val
+                return
+            inorder(node.right)
+
+        inorder(root)
+        return self.result
+    
+    # Iterative DFS with stack
+    # T: O(H+k), where H is a tree height. Since before starting to pop out one has to go down to a leaf. This results in
+    #            O(log⁡N+k) for the balanced tree 
+    #            O(N+k) for completely unbalanced tree 
+    # S: O(H), bc stack
+    #          O(log⁡N) for the balanced tree 
+    #          O(N) for completely unbalanced tree 
+    def kthSmallest(self, root, k):
+        n = 0
+        stack = []
+        cur = root
+        while cur or stack:
+            while cur:
+                 stack.append(cur)
+                 cur = cur.left
+            cur = stack.pop()
+            n += 1
+            if n == k:
+                return cur.val
+            cur = cur.right
+
+# 98. Validate Binary Search Tree
+class Solution98:
+    def isValidBST(self, root):
+        def validate(node, low, high):
+            if not node:
+                return True
+            if low >= node.val or node.val >= high:
+                return False
+            return validate(node.left, low, node.val) and validate(node.right, node.val, high)
+            
+        return validate(root, -float('inf'), float('inf'))
+    
+
+
+
+# 1926. Nearest Exit from Entrance in Maze
+class Solution1926:
     # T: O(M*N)
     # S: O(M*N)
     def nearestExit(self, maze, entrance):
@@ -1894,4 +2292,144 @@ class Solution2300:
             idx = bisect.bisect_left(potions, needed_num)
             result.append(m-idx)      
         return result
+
+
+# =============== Dynamic Programming (DP) ===============
+# 198. House Robber
+class Solution198:
+    # Regular DP
+    # T: O(N)
+    # S: O(N)
+    def rob(self, nums):
+        n = len(nums)
+        if n <= 2:
+            return max(nums)
+        dp = [0] * n
+        dp[0] = nums[0]
+        dp[1] = nums[1]
+        for i in range(1, n):
+            dp[i] = max(dp[i-2] + nums[i], dp[i-1])
+        return dp[-1]
+    
+    # Space optimized
+    # T: O(N)
+    # S: O(1)
+    def rob(self, nums):
+        n = len(nums)
+        if n <= 2:
+            return max(nums)
+        a = nums[0] # F(n-2)
+        b = max(nums[0], nums[1]) # F(n-1)
+        c = 0 # F(n)
+        for i in range(2, n):
+            c = max(a + nums[i], b)
+            a = b
+            b = c
+        return c
+
+# 62. Unique Paths
+class Solution62:
+    # DP
+    # T: O(M*N)
+    # S: O(M*N)
+    def uniquePaths(self, m, n):
+        dp = [[1] * n for _ in range(m)]
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = dp[i-1][j] + dp[i][j-1]
+        return dp[-1][-1]
+    
+    # DP with space optimized
+    # T: O(M*N)
+    # S: O(N)
+    def uniquePaths(self, m, n):
+        dp = [1] * n
+        for _ in range(1, m):
+            for j in range(1, n):
+                dp[j] += dp[j-1]
+        return dp[-1]
+        
+    # Combinatorial problem - using built-in function
+    # horizontal moves: h = m−1; vertical moves: v = n-1; total choices = m+n-2, can choose any right or down moves from total choices
+    # T: standard computation for k! using the definition: O(k^2log⁡k), worse than DP
+    # S: O(1)
+    def uniquePaths(self, m, n):
+        return int(factorial(m + n - 2) / (factorial(n - 1) * factorial(m - 1)))
+    
+    # Combinatorial problem - math
+    # ex: m=8, n=3, ans = 9!/(7!*2!)
+    # T: better than DP
+    # S: O(1)
+    def uniquePaths(self, m, n):
+        c = m + n -2
+        big_num = max(m-1, n-1)
+        small_num = min(m-1, n-1)
+        result = 1
+        # result *= 9*8
+        for i in range(c, big_num, -1):
+            result *= i
+        # result /= 2*1
+        for j in range(small_num, 0, -1):
+            result /= j
+        return int(result)
+
+# =============== Bit ===============
+# 1318. Minimum Flips to Make a OR b Equal to c
+class Solution1318:
+    # regular operation
+    # T: O(1)
+    # S: O(1)
+    def minFlips(self, a, B, C):
+        count = 0
+        while a or b or c:
+            x = a % 2
+            y = b % 2
+            z = c % 2
+            if x == 0 and y == 0 and z == 1:
+                count += 1
+            if z == 0:
+                count += (x == 1)
+                count += (y == 1)
+            a //= 2
+            b //= 2
+            c //= 2
+        return count
+    
+    # bit solution
+    # T: O(1)
+    # S: O(1)
+    def minFlips(self, a, b, c):
+        count = 0
+        while a or b or c:
+            # case: c = 1;  a = 0, b = 0
+            if c & 1:
+                if (a & 1) == 0 and (b & 1) == 0:
+                    count += 1
+                # count += 0 if ((a & 1) or (b & 1)) else 1
+
+            # case: c = 0; if both = 1 -> count += 2
+            #              if either one is 1 -> count += 1
+            #              if neither is 1 -> count += 0
+            else:
+                count += (a & 1) + (b & 1)
+            a >>= 1
+            b >>= 1
+            c >>= 1
+        return count
+
+# =============== Design ===============
+class StockSpanner901:
+
+    def __init__(self):
+        self.stack = [] # stack store 2 elements: (price, count)
+        # count is the number (to its left) smaller than or equal to the current stored price
+
+    def next(self, price: int) -> int:
+        count = 1
+        # if current iterate number is greater than or equal to the price in stack 
+        # -> add the count that's smaller than or equal to the price in stack 
+        while self.stack and self.stack[-1][0] <= price:
+            count += self.stack.pop()[1]
+        self.stack.append([price, count])
+        return count
 
