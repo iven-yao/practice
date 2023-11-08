@@ -2,9 +2,10 @@ package top150._15_Backtracking;
 
 public class q52 {
     int[][] board;
-    int count = 0;
+    int count;
     public int totalNQueens(int n) {
         board = new int[n][n];
+        count = 0;
         helper(0, n);
         return count;
     }
@@ -95,7 +96,8 @@ public class q52 {
 
     public static void main(String[] args) {
         q52 q = new q52();
-        System.out.println(q.totalNQueens(4));
-
+        System.out.println(">>>>> "+q.totalNQueens(4));
+        System.out.println(">>>>> "+q.totalNQueens(3));
+        System.out.println(">>>>> "+q.totalNQueens(5));
     }
 }
