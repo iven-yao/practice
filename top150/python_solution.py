@@ -5,6 +5,7 @@ from collections import deque
 import math
 from math import factorial
 from itertools import product
+import heapq
 
 # =============== Array ===============
 class Solution238:
@@ -36,6 +37,34 @@ class Solution238:
             R *= nums[i]
         return result
 
+# =============== String ===============
+# 14. Longest Common Prefix
+class Solution14:
+    def longestCommonPrefix(self, strs):
+        strs.sort(key=lambda x: (len(x)))
+        # ["flower","flow","flight"] -> ['flow', 'flower', 'flight']
+        result = ""
+        n = len(strs)
+        for i, ch in enumerate(strs[0]):
+            for j in range(1, n):
+                if ch != strs[j][i]:
+                    return result
+            result += ch
+        return result
+    
+    def longestCommonPrefix(self, strs):
+        n = len(strs)
+        strs.sort() # in alphabetical order
+        # ["flower","flow","flight"] -> ['flight', 'flow', 'flower']
+        smallest_word = strs[0]
+        for i in range(len(smallest_word)): # will NOT have index out of range case
+            # if len(smallest_word) <= len(strs[-1]): works fine in the for loop, smallest_word might be prefix of strs[-1], or smaller word
+            # if len(smallest_word) > len(strs[-1]): for loop will MUST stop at the different character (within the length of strs[-1]) between these 2 words
+            #                                        Not possible that len(smallest_word) > len(strs[-1]) and len(smallest_word) is the prefix of len(strs[-1]), bc not meet the sort case!
+            #                                        Ex: ["flower","flz"] -> ["flower","flz"] => stop at i=2
+            if smallest_word[i] != strs[-1][i]:
+                return smallest_word[:i]
+        return smallest_word
 
 
 
@@ -824,40 +853,6 @@ class Solution649:
         return 'Radiant' if len(r_queue) > 0 else 'Dire'
 
 #
-class Solution:
-    def solve(self, board):
-        """
-        Do not return anything, modify board in-place instead.
-        """
-        m = len(board)
-        n = len(board[0])
-        q = deque()
-        for i in range(m):
-            for j in [0, n-1]:
-                if board[i][j] == 'O':
-                    board[i][j] = 'B'
-                    q.append([i,j])
-        for i in [0, m-1]:
-            for j in range(1, n-1):
-                if board[i][j] == 'O':
-                    board[i][j] = 'B'
-                    q.append([i, j])
-        dirs = [(1,0), (-1,0), (0,1), (0,-1)]
-        while q:
-            x, y = q.popleft()
-            for dx, dy in dirs:
-                new_x = x + dx
-                new_y = y + dy
-                if 0 <= new_x < m and 0 <= new_y < n and board[new_x][new_y] == 'O':
-                    board[new_x][new_y] = 'B'
-                    q.append([new_x, new_y])
-
-        for i in range(m):
-            for j in range(n):
-                if board[i][j] == 'B':
-                    board[i][j] = 'O'
-                elif board[i][j] == 'O':
-                    board[i][j] = 'X'
 
 # =============== Linked List ===============
 class ListNode:
@@ -1853,10 +1848,10 @@ class Solution127:
 
         graph = collections.defaultdict(list) # key: word with *; value: list (words in it are original word)
         n = len(beginWord)
-        for w in wordList:
-            for i in range(n):
-                star_word = w[:i] + '*' + w[i+1:]
-                graph[star_word].append(w)
+        for w in wordList: # T: O(N)
+            for i in range(n): # T: O(M)
+                masked_word = w[:i] + '*' + w[i+1:] # T: O(M)
+                graph[masked_word].append(w)
         visited = set()
         count = 1
         q = collections.deque([(beginWord, count)])
@@ -1865,14 +1860,60 @@ class Solution127:
             visited.add(node)
             if node == endWord:
                 return count
-            for i in range(len(node)):
-                star_word = node[:i] + '*' + node[i+1:]
-                if star_word in graph.keys():
-                    for adj_word in graph[star_word]:  
+            for i in range(len(node)): 
+                masked_word = node[:i] + '*' + node[i+1:] 
+                if masked_word in graph.keys():
+                    for adj_word in graph[masked_word]:  
                         if adj_word not in visited:
                             q.append((adj_word, count+1))
                             visited.add(adj_word)
         return 0        
+
+class Solution127:
+    def __init__(self):
+        self.l = 0
+        self.graph = defaultdict(list)
+
+    def visit_word_node(self, q, visited_a, visited_b):
+        q_size = len(q)
+        for _ in range(q_size):
+            cur_word = q.popleft()
+            for i in range(self.l): 
+                masked_cur_word = cur_word[:i] + '*' + cur_word[i+1:]
+                for adj_word in self.graph[masked_cur_word]:
+                    if adj_word in visited_b:
+                        return visited_a[cur_word] + visited_b[adj_word]
+                    if adj_word not in visited_a:
+                        visited_a[adj_word] = visited_a[cur_word] + 1
+                        q.append(adj_word)
+        return None
+
+    def ladderLength(self, beginWord, endWord, wordList):
+        if not endWord or not beginWord or not wordList or endWord not in wordList:
+            return 0
+        self.l = len(beginWord)
+        # graph = defaultdict(list)
+        for w in wordList: # TC: O(N)
+            for i in range(self.l): # TC: O(M)
+                self.graph[w[:i] + '*' + w[i+1:]].append(w) # TC: O(M)
+        q_begin = deque()
+        q_end = deque()
+        q_begin.append(beginWord)
+        q_end.append(endWord)
+        visited_begin = {beginWord: 1} # value: steps
+        visited_end = {endWord: 1} # value: steps
+        result = None
+
+        while q_begin and q_end:
+			# From the shorter queue to progress forward one step 
+            if len(q_begin) <= len(q_end):
+                result = self.visit_word_node(q_begin, visited_begin, visited_end)
+            else:
+                result = self.visit_word_node(q_end, visited_end, visited_begin)
+            if result:
+                return result
+                
+        return 0
 
     
 # 547. Number of Provinces
@@ -1962,7 +2003,7 @@ class Solution200:
                     bfs(i, j)
         return count
 
-class Solution:
+class Solution130:
     def solve(self, board):
         """
         Do not return anything, modify board in-place instead.
@@ -2011,7 +2052,7 @@ class Solution:
 # 399. Evaluate Division
 class Solution399:
     # BFS without helper function
-    # N be the number of input equations; M be the number of queries.
+    # N: number of input equations; M: number of queries.
     # T: O(M*N)
     # S: O(N)
     def calcEquation(self, equations, values, queries):
@@ -2051,8 +2092,8 @@ class Solution207:
     # T: O(M+N), N: number of courses; M: size of prerequisites.
     # S: O(M+N)
     def canFinish(self, numCourses, prerequisites):
-        graph = defaultdict(list)
-        indegree = defaultdict(int) 
+        graph = defaultdict(list) # key: pre-requisite course; value: couses can take after the key prerequisite course
+        indegree = defaultdict(int) # key: course; value: num of pre-requisite courses before taking the key course
         # can be stored as array, too. array index: course number, the integer stored in its index: indegree number of courses (which is how many number of couses need to take before the index course)
         
         for a, b in prerequisites: # T: O(M)
@@ -2085,7 +2126,7 @@ class Solution210:
             indegree[a] += 1
 
         q = collections.deque()
-        visited = set()
+        # visited = set()
         result = []
         for node in range(numCourses):
             if indegree[node] == 0:
@@ -2101,6 +2142,27 @@ class Solution210:
         return result if len(result) == numCourses else []
 
 
+class Node:
+    def __init__(self, val = 0, neighbors = None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+
+from typing import Optional
+class Solution:
+    def __init__(self):
+        self.visited = {}
+    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
+        if not node:
+            return node
+        if node in self.visited:
+            return self.visited[node]
+        clone_node = Node(node.val, [])
+        self.visited[node] = clone_node
+        if node.neighbors:
+            clone_node.neighbors = [self.cloneGraph(n) for n in node.neighbors]
+        return clone_node
+
+        
 
 # =============== Binary Search Tree (BST) ===============
 class Solution530:
@@ -2234,7 +2296,102 @@ class Solution1926:
                     q.append((new_x, new_y, steps+1))
                     visited.add((new_x, new_y))
         return -1
+
+# =============== Trie ===============
+# 208. Implement Trie (Prefix Tree)
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+
+class Trie:
+
+    def __init__(self):
+        self.root = TrieNode()
         
+
+    def insert(self, word: str) -> None:
+        cur = self.root
+        for w in word:
+            if w not in cur.children.keys():
+                cur.children[w] = TrieNode()
+            cur = cur.children[w]
+        cur.is_end = True
+
+
+    def search(self, word: str) -> bool:
+        cur = self.root
+        for w in word:
+            if w not in cur.children.keys():
+                return False
+            cur = cur.children[w]
+        return cur.is_end
+
+    def startsWith(self, prefix: str) -> bool:
+        cur = self.root
+        for w in prefix:
+            if w not in cur.children.keys():
+                return False
+            cur = cur.children[w]
+        return True
+
+# 212. Word Search II
+class TrieNode:
+    # constructor
+    def __init__(self):
+        # 2 member variables
+        self.children = {}
+        self.is_word = False
+        
+    def add_word(self, word):
+        cur = self
+        for w in word:
+            if w not in cur.children.keys():
+                cur.children[w] = TrieNode()
+                cur = cur.children[w]
+            else:
+                cur = cur.children[w]
+
+        cur.is_word = True
+
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        root = TrieNode()
+        for word in words:
+            root.add_word(word)
+
+        def dfs(i, j, cur_d, found_word):
+            if i >= m or i < 0 or j >= n or j < 0 or (i, j) in visited or board[i][j] not in cur_d.children:
+                return 
+
+            visited.add((i,j))
+            letter = board[i][j]
+            cur_d = cur_d.children[letter]
+            found_word += letter
+            
+            # base case
+            if cur_d.is_word == True:
+                result.add(found_word)
+            
+            for dx, dy in [(1,0), (-1,0), (0,1), (0,-1)]:
+                new_i = i + dx
+                new_j = j + dy
+                dfs(new_i, new_j, cur_d, found_word)
+
+            visited.remove((i,j))
+
+        result = set()
+        m = len(board)
+        n = len(board[0])
+        visited = set()
+        for i in range(m):
+            for j in range(n):
+                dfs(i, j, root, "")
+        return list(result)
+
+
+            
+# =============== Backtracking ===============
 # 17. Letter Combinations of a Phone Number
 # dfs func write inside main func
 class Solution17:
@@ -2274,6 +2431,126 @@ class Solution17:
             for ch in d[digits[cur_idx]]:
                 self.backtrack(digits, d, cur_idx+1, comb+ch, result)
 
+
+# 77. Combinations
+class Solution77:
+    def combine(self, n, k):
+        result = []
+        def dfs(cur_idx, path):
+            if len(path) == k:
+                result.append(path)
+                return
+            for i in range(cur_idx+1, n+1):
+                dfs(i, path+[i])
+        dfs(0, [])
+        return result
+
+# 46. Permutations
+class Solution46:
+    def permute(self, nums):
+        result = []
+        def dfs(path):
+            if len(path) == len(nums):
+                result.append(path)
+                return 
+            for n in nums:
+                if n not in path:
+                    dfs(path + [n])
+        dfs([])
+        return result
+
+# 39. Combination Sum
+class Solution39:
+    def combinationSum(self, candidates, target):
+        result = []
+        n = len(candidates)
+        def dfs(idx, path):
+            if sum(path) == target:
+                result.append(path)
+                return
+            if sum(path) > target:
+                return
+            for i in range(idx, n):
+                dfs(i, path+[candidates[i]])
+            
+        dfs(0, [])
+        return result
+
+# 22. Generate Parentheses
+class Solution22:
+    def generateParenthesis(self, n):
+        result = []
+        def dfs(left, right, path):
+            if left > right:
+                return
+            if left == 0 and right == 0:
+                result.append(path)
+                return
+            if left > 0:
+                dfs(left-1, right, path+'(')
+            if right > 0:
+                dfs(left, right-1, path+')')
+
+        dfs(n, n, '')
+        return result
+
+# 79. Word Search
+class Solution79:
+    def exist(self, board, word):
+        def dfs(i, j, suffix):
+            if len(suffix) == 0:
+                return True
+            if i < 0 or i >= m or j < 0 or j >= n or board[i][j] != suffix[0]:
+                return False
+            board[i][j] = '$'
+            for dx, dy in [(1,0), (-1,0), (0,1), (0,-1)]:
+                new_i = i + dx
+                new_j = j + dy
+                if dfs(new_i, new_j, suffix[1:]) == True:
+                    return True
+            board[i][j] = suffix[0]
+            return False
+
+        m = len(board)
+        n = len(board[0])
+        for i in range(m):
+            for j in range(n):
+                if dfs(i, j, word) == True:
+                    return True
+        return False
+
+# 52. N-Queens II
+class Solution52:
+    def totalNQueens(self, n: int) -> int:      
+        diag1 = set()
+        diag2 = set()
+        usedCols = set()
+        
+        return self.helper(n, diag1, diag2, usedCols, 0)
+
+    def helper(self, n, diag1, diag2, usedCols, row):
+        if row == n:
+            return 1
+        
+        solutions = 0
+        
+        for col in range(n):
+            if row + col in diag1 or row - col in diag2 or col in usedCols:
+                continue
+                
+            diag1.add(row + col)
+            diag2.add(row - col)
+            usedCols.add(col)
+            
+            solutions += self.helper(n, diag1, diag2, usedCols, row + 1)
+        
+            diag1.remove(row + col)
+            diag2.remove(row - col)
+            usedCols.remove(col)
+        
+        return solutions
+            
+            
 
 # =============== Binary Search ===============
 class Solution2300:
@@ -2432,4 +2709,26 @@ class StockSpanner901:
             count += self.stack.pop()[1]
         self.stack.append([price, count])
         return count
+
+
+# =============== Heap ===============
+# 2542. Maximum Subsequence Score
+class Solution2542:
+    # T: O(NlogN)
+    # S: O(N), because pairs matrix; and heap
+    def maxScore(self, nums1, nums2, k):
+        pairs = []
+        for n1, n2 in zip(nums1, nums2):
+            pairs.append((n1, n2))
+        pairs.sort(key=lambda x:-x[1])
+        top_k_heap = [x[0] for x in pairs[:k]] # sort pairs by the second element (nums2[i]) in decreasing order.
+        top_k_sum = sum(top_k_heap)
+        heapq.heapify(top_k_heap)
+        result = top_k_sum * pairs[k-1][1] # pairs[k-1][1]: min of the selected elements from nums2.
+        for n1, n2 in pairs[k:]:
+            top_k_sum -= heapq.heappop(top_k_heap) # pop out the smallest element in nums1
+            top_k_sum += n1
+            heapq.heappush(top_k_heap, n1)
+            result = max(result, top_k_sum * n2) # n2: min of the selected elements from nums2 (bc already sorted in descending way).
+        return result
 
