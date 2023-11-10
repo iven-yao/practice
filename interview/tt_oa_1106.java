@@ -57,11 +57,23 @@ public class tt_oa_1106 {
 
         int sum = 0;
         for(int i = 0; i < n; i++) {
-            sum += (i+1) * memory[i];
+            sum += multiply((i+1), memory[i]);
             sum %= mod;
         }
 
         return sum;
+    }
+
+    private static int multiply(int i, int mem) {
+        if(i == 1 || mem == 1) return i*mem;
+        
+        int mod = 1000000000 + 7;
+        if(mem%2 == 0) {
+            return 2 * multiply(i, mem/2) % mod;
+        } else {
+            return (2 * multiply(i, mem/2) + i) % mod;
+        }
+        
     }
 
     public static void main(String[] args) {
