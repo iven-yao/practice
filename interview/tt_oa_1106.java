@@ -25,6 +25,7 @@ public class tt_oa_1106 {
         return dp[n][total_bandwidth];
     }
 
+    // easy hash map
     public static boolean[] getMessageStatus(int[] time, String[] msg, int k) {
         Map<String, Integer> lastMsg = new HashMap<>();
         boolean[] status = new boolean[msg.length];
@@ -43,6 +44,7 @@ public class tt_oa_1106 {
         return status;
     }
 
+    // swap and big number multiply issue
     public static int maxEfficiency(int[] memory) {
         int n = memory.length;
         int mod = 1000000000 + 7;
