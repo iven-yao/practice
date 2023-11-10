@@ -16,12 +16,14 @@ public class q23 {
             if(list != null) minHeap.offer(list);
         }
 
-        while(!minHeap.isEmpty()) {
+        while(minHeap.size() > 1) {
             ptr.next = minHeap.poll();
             ptr = ptr.next;
 
             if(ptr.next != null) minHeap.offer(ptr.next);
         }
+
+        ptr.next = minHeap.poll();
 
         return dummy.next;
     }
