@@ -6,6 +6,7 @@ import math
 from math import factorial
 from itertools import product
 import heapq
+import random
 
 # =============== Array ===============
 class Solution238:
@@ -852,7 +853,22 @@ class Solution649:
             idx += 1
         return 'Radiant' if len(r_queue) > 0 else 'Dire'
 
-#
+# 334. Increasing Triplet Subsequence
+class Solution334:
+    # T: O(N)
+    # S: O(1)
+    def increasingTriplet(self, nums):
+        n = len(nums)
+        first = float('inf')
+        second = float('inf')
+        for i in range(n):
+            if nums[i] < first:
+                first = nums[i]
+            elif nums[i] < second:
+                second = nums[i]
+            else:
+                return True
+        return False
 
 # =============== Linked List ===============
 class ListNode:
@@ -2496,10 +2512,44 @@ class Solution22:
 
 # 79. Word Search
 class Solution79:
-    def exist(self, board, word):
+    # backtrack to original board when we find or not find the word
+    # N: number of cells in the board; L: the length of the word to be matched
+    # T: O(N*3^L), at first we have at most 4 directions to explore, but further the choices are reduced into 3 (since we won't go back to where we come from).
+    # S: O(L)
+    def exist(self, board, word) -> bool:
+        m = len(board)
+        n = len(board[0])
         def dfs(i, j, suffix):
             if len(suffix) == 0:
                 return True
+            if i >= m or i < 0 or j >= n or j < 0 or board[i][j] != suffix[0]:
+                return False
+            ret_val = False
+            board[i][j] = "$"
+            for dx, dy in [(1,0), (-1,0), (0,1), (0,-1)]:
+                ret_val = dfs(i+dx, j+dy, suffix[1:])
+                if ret_val:
+                    break
+            board[i][j] = suffix[0]
+            return ret_val
+
+        for i in range(m):
+            for j in range(n):
+                ret = dfs(i, j, word)
+                if ret == True:
+                    return True
+        return False
+        
+    # NOT backtrack to original board when we find the word
+    # T: O(N*3^L), at first we have at most 4 directions to explore, but further the choices are reduced into 3 (since we won't go back to where we come from).
+    # S: O(L)
+    def exist(self, board, word):
+        def dfs(i, j, suffix):
+            # bottom case: we find match for each letter in the word
+            # need to write before checking if the current state is valid or not
+            if len(suffix) == 0:
+                return True
+            # check if the current state is invalid
             if i < 0 or i >= m or j < 0 or j >= n or board[i][j] != suffix[0]:
                 return False
             board[i][j] = '$'
@@ -2507,8 +2557,8 @@ class Solution79:
                 new_i = i + dx
                 new_j = j + dy
                 if dfs(new_i, new_j, suffix[1:]) == True:
-                    return True
-            board[i][j] = suffix[0]
+                    return True # if we find a match, we return before backtrack '$' back to originsl word
+            board[i][j] = suffix[0] # backtrack
             return False
 
         m = len(board)
@@ -2519,40 +2569,343 @@ class Solution79:
                     return True
         return False
 
+# 51. N-Queens
+class Solution51:
+    # N: the number of queens (which is the same as the width and height of the board).
+    # T: O(N!)
+    # will only place queens on squares that aren't under attack. 
+    # For the first queen, we have N options. 
+    # For the next queen, we won't attempt to place it in the same column as the first queen, and there must be at least one square attacked diagonally by the first queen as well. Thus, the maximum number of squares we can consider for the second queen is N−2. 
+    # For the third queen, we won't attempt to place it in 2 columns already occupied by the first 2 queens, and there must be at least two squares attacked diagonally from the first 2 queens. Thus, the maximum number of squares we can consider for the third queen is N−4. 
+    # result in an approximate time complexity of N!.
+    # S: O(N^2), bc keep the board state costs O(N^2)
+    def solveNQueens(self, n):
+        result = []
+
+        def create_board(state): # T: O(N^2)
+            board = []
+            for row in state:
+                board.append(''.join(row))
+            return board
+
+        def dfs(row, cols, diagonals, anti_diagonals, state):
+            # Base case - N queens have been placed
+            if row == n:
+                result.append(create_board(state)) # valid solution: S(N
+                # => T: S(N) * N^2
+                return
+            for col in range(n):
+                # For each square on a given diagonal, (row - col) will be constant.
+                cur_diagonal = row - col 
+                # For each square on a given anti-diagonal, (row + col) will be constant.
+                cur_anti_diagonal = row + col
+                # If the queen is not placeable
+                if col in cols or cur_diagonal in diagonals or cur_anti_diagonal in anti_diagonals:
+                    continue
+
+                 # "Add" the queen to the board
+                cols.add(col)
+                diagonals.add(cur_diagonal)
+                anti_diagonals.add(cur_anti_diagonal)
+                state[row][col] = 'Q'
+
+                # Move on to the next row with the updated board state
+                dfs(row+1, cols, diagonals, anti_diagonals, state)
+
+                # backtrack
+                # "Remove" the queen from the board since we have already
+                # explored all valid paths using the above function call
+                cols.remove(col)
+                diagonals.remove(cur_diagonal)
+                anti_diagonals.remove(cur_anti_diagonal)
+                state[row][col] = '.'
+
+        result = []
+        empty_board = [["."] * n for _ in range(n)]
+        dfs(0, set(), set(), set(), empty_board)
+        return result
+
 # 52. N-Queens II
 class Solution52:
-    def totalNQueens(self, n: int) -> int:      
-        diag1 = set()
-        diag2 = set()
-        usedCols = set()
-        
-        return self.helper(n, diag1, diag2, usedCols, 0)
-
-    def helper(self, n, diag1, diag2, usedCols, row):
-        if row == n:
-            return 1
-        
-        solutions = 0
-        
-        for col in range(n):
-            if row + col in diag1 or row - col in diag2 or col in usedCols:
-                continue
-                
-            diag1.add(row + col)
-            diag2.add(row - col)
-            usedCols.add(col)
-            
-            solutions += self.helper(n, diag1, diag2, usedCols, row + 1)
-        
-            diag1.remove(row + col)
-            diag2.remove(row - col)
-            usedCols.remove(col)
-        
-        return solutions
-            
+    # method same as LC 51
+    # N: the number of queens (which is the same as the width and height of the board).
+    # T: O(N!)
+    # S: O(N), bc keep the set cost O(N)
+    def totalNQueens(self, n):      
+        self.result = 0
+        def dfs(row, cols, diagonals, anti_diagonals):
+            if row == n:
+                self.result += 1
+            for col in range(n):
+                cur_diagonal = row - col
+                cur_anti_diagonal = row + col
+                if col in cols or cur_diagonal in diagonals or cur_anti_diagonal in anti_diagonals:
+                    continue
+                cols.add(col)
+                diagonals.add(cur_diagonal)
+                anti_diagonals.add(cur_anti_diagonal)
+                dfs(row+1, cols, diagonals, anti_diagonals)
+                # backtrack
+                cols.remove(col)
+                diagonals.remove(cur_diagonal)
+                anti_diagonals.remove(cur_anti_diagonal)
+        dfs(0, set(), set(), set())
+        return self.result
             
 
-# =============== Binary Search ===============
+# 108. Convert Sorted Array to Binary Search Tree
+class Solution108:
+    def sortedArrayToBST(self, nums):
+        def dfs(left, right):
+            if left > right:
+                return None
+            mid_idx = (left+right)//2
+            if (left+right)%2 == 1:
+                mid_idx += random.randint(0,1)
+            root = TreeNode(nums[mid_idx])
+            root.left = dfs(left, mid_idx-1)
+            root.right = dfs(mid_idx+1, right)
+            return root
+        return dfs(0, len(nums)-1)
+    
+# 148. Sort List
+class Solution148:
+    def sortList(self, head):
+        if head == None or head.next == None:
+            return head
+
+        slow = head
+        fast = head
+        while fast.next != None and fast.next.next != None:
+            fast = fast.next.next
+            slow = slow.next
+        second = slow.next
+        slow.next = None
+        list1 = self.sortList(head)
+        list2 = self.sortList(second)
+        return self.merge(list1, list2)
+        
+    def merge(self, list1, list2):
+        cur = dummy = ListNode(0)
+        p1 = list1
+        p2 = list2
+        while p1 and p2:
+            if p1.val < p2.val:
+                cur.next = p1
+                p1 = p1.next
+            else:
+                cur.next = p2
+                p2 = p2.next
+            cur = cur.next
+        if p1:
+            cur.next = p1
+        if p2:
+            cur.next = p2
+        return dummy.next
+
+        
+# 427. Construct Quad Tree
+# Definition for a QuadTree node.
+class Node:
+    def __init__(self, val, isLeaf, topLeft, topRight, bottomLeft, bottomRight):
+        self.val = val
+        self.isLeaf = isLeaf
+        self.topLeft = topLeft
+        self.topRight = topRight
+        self.bottomLeft = bottomLeft
+        self.bottomRight = bottomRight
+
+class Solution427:
+    def construct(self, grid):
+        def dfs(n, r, c):
+            # the only base case: the current grid has the same value (i.e all 1's or all 0's)
+            # n==1 case is included in this case -> dont need to specify
+            all_same = True
+            for i in range(n):
+                for j in range(n):
+                    if grid[r][c] != grid[r+i][c+j]:
+                        all_same = False
+                        break
+            if all_same:
+                return Node(grid[r][c], True, None, None, None, None)
+                # return Node(grid[r][c], True)
+                # set val to the value of the grid and set the four children to Null (or dont set it, and use default None) and stop.
+            
+            # If not meet base case, keep recursively call dfs
+            n = n//2
+            top_left = dfs(n, r, c)
+            top_right = dfs(n, r, c+n)
+            bottom_left = dfs(n, r+n, c)
+            bottom_right = dfs(n, r+n, c+n)
+            return Node(0, False, top_left, top_right, bottom_left, bottom_right)
+        
+        return dfs(len(grid), 0, 0)
+
+# 23. Merge k Sorted Lists
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution23:
+    def mergeKLists(self, lists):
+        minHeap = []
+        for l in lists:
+            tmp = l
+            while tmp:
+                heapq.heappush(minHeap, tmp.val)
+                tmp = tmp.next
+
+        dummy = ListNode(-1)
+        res = dummy 
+        while minHeap:
+            res.next = ListNode(heapq.heappop(minHeap))
+            res = res.next
+
+        return dummy.next
+
+            
+
+# =============== Kadane's Algorithm =============== 
+# finding the maximum sum subarray from a given array
+
+# 53. Maximum Subarray
+class Solution53:
+    # T: O(N)
+    # S: O(N)
+    def maxSubArray(self, nums):
+        n = len(nums)
+        dp = [0] * n
+        dp[0] = nums[0]
+        for i in range(1, n):
+            dp[i] = max(dp[i-1]+nums[i], nums[i])
+        return max(dp)
+
+    # T: O(N)
+    # S: O(1)
+    def maxSubArray(self, nums):
+        n = len(nums)
+        curSum = -float('inf')
+        result = -float('inf')
+        for i in range(n):
+            curSum = max(curSum + nums[i], nums[i])
+            result = max(result, curSum)
+        return result
+
+# 918. Maximum Sum Circular Subarray
+class Solution918:
+    def maxSubarraySumCircular(self, nums):
+        if max(nums) < 0:
+            return max(nums)
+        n = len(nums)
+        max_dp = [0]*n
+        min_dp = [0]*n
+        max_dp[0] = nums[0]
+        min_dp[0] = nums[0]
+
+        for i in range(1, n):
+            max_dp[i] = max(max_dp[i-1] + nums[i], nums[i])
+            min_dp[i] = min(min_dp[i-1] + nums[i], nums[i])
+
+        return max(max(max_dp), sum(nums)-min(min_dp))
+        
+    
+# =============== Binary Search (BS) ===============
+# 35. Search Insert Position
+
+class Solution35:
+    # template 1
+    # T: O(logN)
+    # S: O(1)
+    def searchInsert(self, nums, target):
+        left = 0
+        right = len(nums) - 1
+        while left <= right:
+            mid = left + (right-left) // 2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return left
+    
+    # template 2
+    # T: O(logN)
+    # S: O(1)
+    def searchInsert(self, nums, target):
+        left = 0
+        right = len(nums) - 1
+        while left < right:
+            mid = left + (right-left) // 2
+            if nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid
+        # 1 more candidate
+        # post-processing
+        return left if target <= nums[left] else left + 1
+
+    # bisect.bisect_left()
+    # T: O(logN)
+    # S: O(1)
+    def searchInsert(self, nums, target):
+        idx = bisect.bisect_left(nums, target)
+        return idx
+
+
+# 74. Search a 2D Matrix
+class Solution74:
+    # template 1
+    # T: O(M*N)
+    # S: O(1)
+    def searchMatrix(self, matrix, target):
+        m = len(matrix)
+        n = len(matrix[0])
+        left = 0
+        right = m*n-1
+        while left <= right:
+            mid = left + (right-left) // 2
+            i = mid // n
+            j = mid % n
+            if matrix[i][j] == target:
+                return True
+            elif matrix[i][j] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return False
+
+    # template 2
+    # T: O(M*Nlog(M*N))
+    # S: O(1)
+    def searchMatrix(self, matrix, target):
+        m = len(matrix)
+        n = len(matrix[0])
+        left = 0
+        right = m*n-1
+        while left < right:
+            mid = left + (right-left)//2
+            i = mid // n
+            j = mid % n
+            if matrix[i][j] < target:
+                left = mid+1
+            else:
+                right = mid
+        return matrix[left//n][left%n] == target
+    
+    # bisect.bisect_left()
+    # T: O(M*N)
+    # S: O(M*N)
+    def searchMatrix(self, matrix, target):
+        m = len(matrix)
+        n = len(matrix[0])
+        one_d_matrix = []
+        for row in matrix:
+            one_d_matrix.extend(row)
+        idx = bisect.bisect_left(one_d_matrix, target)
+        return idx < m*n and one_d_matrix[idx] == target
+    
 class Solution2300:
     # Notice that if a spell and potion pair is successful, then the spell and all stronger potions will be successful too.
     # sort potions, and do BS
@@ -2570,6 +2923,17 @@ class Solution2300:
             result.append(m-idx)      
         return result
 
+class Solution162:
+    # T: O(N)
+    # S: O(1)
+    def findPeakElement(self, nums):
+        n = len(nums)
+        for i in range(n-1):
+            if nums[i] > nums[i+1]:
+                return i
+        return n-1
+
+        
 
 # =============== Dynamic Programming (DP) ===============
 # 198. House Robber
@@ -2649,6 +3013,36 @@ class Solution62:
         for j in range(small_num, 0, -1):
             result /= j
         return int(result)
+
+class Solution1143:
+    def longestCommonSubsequence(self, text1, text2):
+        len1 = len(text1)
+        len2 = len(text2)
+        dp = [[0] * (len2+1) for _ in range(len1+1)]
+        for i in range(len1):
+            for j in range(len2):
+                if text1[i] == text2[j]:
+                    dp[i+1][j+1] = dp[i][j] + 1
+                else:
+                    dp[i+1][j+1] = max(dp[i][j+1], dp[i+1][j])
+        return dp[-1][-1] 
+
+# 1143. Longest Common Subsequence
+class Solution1143:
+    # T: O(M*N), M: len of text1; N: len of text2
+    # S: O(M*N)
+    def longestCommonSubsequence(self, text1, text2):
+        len1 = len(text1)
+        len2 = len(text2)
+        dp = [[0] * (len2+1) for _ in range(len1+1)]
+        for i in range(len1):
+            for j in range(len2):
+                if text1[i] == text2[j]:
+                    dp[i+1][j+1] = dp[i][j] + 1
+                else:
+                    dp[i+1][j+1] = max(dp[i][j+1], dp[i+1][j])
+        return dp[-1][-1]
+    
 
 # =============== Bit ===============
 # 1318. Minimum Flips to Make a OR b Equal to c
