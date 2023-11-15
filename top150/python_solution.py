@@ -2352,6 +2352,7 @@ class Trie:
         return True
 
 # 212. Word Search II
+# build trie 
 class TrieNode:
     # constructor
     def __init__(self):
@@ -2371,8 +2372,9 @@ class TrieNode:
         cur.is_word = True
 
 class Solution:
-    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+    def findWords(self, board, words):
         root = TrieNode()
+        # build trie for all the word in given words array
         for word in words:
             root.add_word(word)
 
@@ -2394,6 +2396,7 @@ class Solution:
                 new_j = j + dy
                 dfs(new_i, new_j, cur_d, found_word)
 
+            # backtrack
             visited.remove((i,j))
 
         result = set()
@@ -2424,6 +2427,7 @@ class Solution17:
                 return
             else:
                 for ch in d[digits[cur_idx]]:
+
                     backtrack(cur_idx+1, comb+ch)
         backtrack(0, '')
         return result
@@ -2450,6 +2454,7 @@ class Solution17:
 
 # 77. Combinations
 class Solution77:
+    # start from dfs(0, [])
     def combine(self, n, k):
         result = []
         def dfs(cur_idx, path):
@@ -2459,6 +2464,18 @@ class Solution77:
             for i in range(cur_idx+1, n+1):
                 dfs(i, path+[i])
         dfs(0, [])
+        return result
+    
+    # start from dfs(1, [])
+    def combine(self, n, k):
+        result = []
+        def dfs(cur_idx, path):
+            if len(path) == k:
+                result.append(path)
+                return
+            for i in range(cur_idx, n+1):
+                dfs(i+1, path+[i])
+        dfs(1, [])
         return result
 
 # 46. Permutations
@@ -2497,14 +2514,15 @@ class Solution22:
     def generateParenthesis(self, n):
         result = []
         def dfs(left, right, path):
-            if left > right:
-                return
+            # if left > right:
+            #     return
             if left == 0 and right == 0:
                 result.append(path)
                 return
             if left > 0:
                 dfs(left-1, right, path+'(')
-            if right > 0:
+            # if right > 0:
+            if right > left:
                 dfs(left, right-1, path+')')
 
         dfs(n, n, '')
@@ -2641,14 +2659,17 @@ class Solution52:
                 cur_anti_diagonal = row + col
                 if col in cols or cur_diagonal in diagonals or cur_anti_diagonal in anti_diagonals:
                     continue
+                # place queen
                 cols.add(col)
                 diagonals.add(cur_diagonal)
                 anti_diagonals.add(cur_anti_diagonal)
+                # continue to dfs
                 dfs(row+1, cols, diagonals, anti_diagonals)
                 # backtrack
                 cols.remove(col)
                 diagonals.remove(cur_diagonal)
                 anti_diagonals.remove(cur_anti_diagonal)
+
         dfs(0, set(), set(), set())
         return self.result
             
@@ -2660,6 +2681,7 @@ class Solution108:
             if left > right:
                 return None
             mid_idx = (left+right)//2
+            # Choose Random Middle Node as a Root
             if (left+right)%2 == 1:
                 mid_idx += random.randint(0,1)
             root = TreeNode(nums[mid_idx])
@@ -2668,8 +2690,24 @@ class Solution108:
             return root
         return dfs(0, len(nums)-1)
     
+    def sortedArrayToBST(self, nums):
+        def dfs(left, right):
+            if left > right:
+                return None
+            mid_idx = (left+right)//2 # Choose Left Middle Node as a Root
+            root = TreeNode(nums[mid_idx])
+            root.left = dfs(left, mid_idx-1)
+            root.right = dfs(mid_idx+1, right)
+            return root
+        return dfs(0, len(nums)-1)
+    
 # 148. Sort List
 class Solution148:
+    # top down merge sort
+    # T: O(NlogN)
+    # S: O(logN)
+
+    # T: O(logN)
     def sortList(self, head):
         if head == None or head.next == None:
             return head
@@ -2685,6 +2723,7 @@ class Solution148:
         list2 = self.sortList(second)
         return self.merge(list1, list2)
         
+    # T: O(N)
     def merge(self, list1, list2):
         cur = dummy = ListNode(0)
         p1 = list1
@@ -2742,11 +2781,6 @@ class Solution427:
         return dfs(len(grid), 0, 0)
 
 # 23. Merge k Sorted Lists
-# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
 class Solution23:
     def mergeKLists(self, lists):
         minHeap = []
@@ -2932,7 +2966,287 @@ class Solution162:
             if nums[i] > nums[i+1]:
                 return i
         return n-1
+    
+    # template 1
+    # T: O(N)
+    # S: O(1)
+    def findPeakElement(nums):
+        n = len(nums)
+        l = 0
+        r = n-1
+        while l <= r:
+            mid = l + (r-l)//2
+            # right element is greater 
+            if mid+1 < n and nums[mid] < nums[mid+1]:
+                l = mid+1
+            # left element is greater
+            elif mid-1 >= 0 and nums[mid-1] > nums[mid]:
+                r = mid-1
+            else:
+                return mid
+        
+    # template 2
+    # T: O(N)
+    # S: O(1)
+    def findPeakElement(nums):
+        n = len(nums)
+        left = 0
+        right = n-1
+        while left < right:
+            mid = left+(right-left)//2
+            if nums[mid] <= nums[mid+1]:
+                left = mid + 1
+            else:
+                right = mid
+        return left
 
+
+# 153. Find Minimum in Roateted Sorted Array
+class Solution153:
+    # T: O(logN)
+    # S: O(1)
+    def findMin(self, nums):
+        n = len(nums)
+        left = 0
+        right = n-1
+        while left < right:
+            mid = left+(right-left)//2
+            if nums[mid] >= nums[-1]:
+                left = mid+1
+            else:
+                right = mid
+        return nums[left]
+
+
+
+
+# 33. Search in Rotated Sorted Array
+class Solution33:
+    # Find Pivot Index + Binary Search with Shift
+    def search(self, nums, target):
+        n = len(nums)
+        left = 0
+        right = n-1
+        while left < right:
+            mid = left+(right-left)//2
+            if nums[mid] >= nums[-1]:
+                left = mid+1
+            else:
+                right = mid
+            ''' # can also write as below:
+            if nums[mid] < nums[-1]:
+                right = mid
+            else:
+                left = mid+1
+            '''
+        pivot = left
+        left = 0 
+        right = n-1
+        # shift every element to the right by n - pivot steps to reach the sorted version of nums
+        shift = n-pivot
+        while left <= right:
+            mid = left+(right-left)//2
+            # we now need to shift the index in the sorted nums to the left by n - pivot steps to find its corresponding index, i, in the original nums (back to original Rotated Sorted Array). 
+            # This gives us i - (n - pivot) (taking the modulus of n into account).
+            real_mid = (mid-shift)%n 
+            if nums[real_mid] == target:
+                return real_mid
+            elif nums[real_mid] < target:
+                left = mid+1
+            else:
+                right = mid-1
+        return -1
+
+    # Find Pivot Index + Binary Search with Shift (in helper function)
+    # Ex: nums=[4,5,6,7,0,1,2], target=6
+    def search(self, nums, target):
+        n = len(nums)
+        left = 0
+        right = n-1
+        while left < right:
+            mid = left+(right-left)//2
+            if nums[mid] >= nums[-1]:
+                left = mid+1
+            else:
+                right = mid
+        
+        def shiftBS(pivot_index, target):
+            shift = n-pivot_index
+            left = 0
+            right = n-1
+            while left <= right:
+                mid = left+(right-left)//2
+                real_mid = (mid-shift)%n
+                if nums[real_mid] == target:
+                    return real_mid
+                elif nums[real_mid] < target:
+                    left = mid+1
+                else:
+                    right = mid-1
+            return -1
+
+        return shiftBS(left, target)
+    
+    # one binary search, compare with the leftmost value
+    def search(self, nums, target):
+        n = len(nums)
+        left = 0
+        right = n-1
+        while left <= right:
+            mid = left+(right-left)//2
+            if nums[mid] == target:
+                return mid
+
+            # compare with the leftmost value to know if current mid's left is sorted OR current mid's right is sorted
+            elif nums[left] <= nums[mid]:  # subarray on mid's left is sorted
+                if nums[left] <= target <= nums[mid]:
+                    right = mid-1
+                else: # if target > nums[mid] or target < nums[left]
+                    left = mid+1
+            else: # subarray on mid's right is sorted.
+                if nums[mid] <= target <= nums[right]:        
+                    left = mid+1
+                else: # if target < nums[mid] or target > nums[right] 
+                    right = mid-1 
+        return -1
+
+    # one binary search, compare with the rightmost value
+    def search(self, nums, target):
+        n = len(nums)
+        left = 0
+        right = n-1
+        while left <= right:
+            mid = left+(right-left)//2
+            if nums[mid] == target:
+                return mid
+            # compare with the rightmost value
+            elif nums[mid] > nums[-1]: # left is sorted
+                if nums[left] <= target <= nums[mid]:
+                    right = mid-1
+                else:
+                    left = mid+1
+            else: # right is sorted
+                if nums[mid] <= target <= nums[right]:
+                    left = mid+1
+                else:
+                    right = mid-1
+        return -1
+    
+class Solution34:
+    # bisect
+    # T: O(logN)
+    # S: O(1)
+    def searchRange(self, nums, target):
+        left_idx = bisect.bisect_left(nums, target)
+        right_idx = bisect.bisect_right(nums, target)
+        left = -1
+        right = -1
+        n = len(nums)
+        if left_idx < n and nums[left_idx] == target:
+            left = left_idx
+        if right_idx > 0 and nums[right_idx-1] == target:
+            right = right_idx-1
+        return [left, right]
+
+    # bisect optimized version
+    # T: O(logN)
+    # S: O(1)
+    def searchRange(self, nums, target):
+        n = len(nums)
+        if n == 0:
+            return [-1, -1]
+        l_idx = bisect.bisect_left(nums, target)
+        if l_idx == n or nums[l_idx] != target:
+            return [-1, -1]
+        r_idx = bisect.bisect_right(nums, target)
+        return [l_idx, r_idx-1]
+    
+    # Binary search and linear search to the left/right to find the first and the last position
+    # T: O(N)
+    # S: O(1)
+    def searchRange(self, nums, target):
+        n = len(nums)
+        left = 0 
+        right = n-1
+        while left <= right:
+            mid = left+(right-left)//2
+            if nums[mid] == target:
+                l_idx = mid
+                r_idx = mid
+                while l_idx > 0 and nums[l_idx-1] == target:
+                    l_idx -= 1
+                while r_idx+1 < n and nums[r_idx+1] == target:
+                    r_idx += 1
+                return [l_idx, r_idx]
+            elif nums[mid] > target:
+                right = mid-1
+            else:
+                left = mid+1
+        return [-1, -1]
+    
+    # BS template 1
+    # T: O(logN)
+    # S: O(1)
+    def searchRange(self, nums, target):
+
+        def bs(nums, target, left_bias):
+            n = len(nums)
+            left = 0 
+            right = n-1
+            idx = -1
+            while left <= right:
+                mid = left+(right-left)//2
+                if nums[mid] == target:
+                    idx = mid
+                    if left_bias == 1:
+                        right = mid-1
+                    elif left_bias == 0:
+                        left = mid+1
+                elif nums[mid] > target:
+                    right = mid-1
+                else:
+                    left = mid+1
+            return idx
+
+        l_idx = bs(nums, target, 1)
+        r_idx = bs(nums, target, 0) 
+        return [l_idx, r_idx]
+    
+
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        len1 = len(nums1)
+        len2 = len(nums2)
+         # when total length is odd, the median is the middle
+        if(len1+len2) % 2 != 0:
+            return self.get_kth(nums1, nums2, 0, len1-1, 0,len2-1, (len1+len2)//2)
+        else:
+        # when total length is even, the median is the average of the middle 2
+            mid1 = self.get_kth(nums1, nums2, 0, len1-1, 0, len2-1, (len1+len2)//2)
+            mid2 = self.get_kth(nums1, nums2, 0, len1-1, 0, len2-1, (len1+len2)//2 -1)
+        return (mid1 + mid2) / 2
+            
+    def get_kth(self, nums1, nums2, start1, end1, start2, end2, k):
+        if start1 > end1:
+            return nums2[k-start1]
+        if start2 > end2:
+            return nums1[k-start2]
+        
+        mid1 = (start1 + end1) // 2
+        mid2 = (start2 + end2) // 2
+        mid1Value = nums1[mid1]
+        mid2Value = nums2[mid2]
+
+        if (mid1 + mid2) < k:
+            if mid1Value > mid2Value:
+                return self.get_kth(nums1, nums2, start1, end1, mid2+1, end2, k)
+            else:
+                return self.get_kth(nums1, nums2, mid1+1, end1, start2, end2, k)
+        else:
+            if mid1Value > mid2Value:
+                return self.get_kth(nums1, nums2, start1, mid1-1, start2, end2, k)
+            else:
+                return self.get_kth(nums1, nums2, start1, end1, start2, mid2-1, k)
         
 
 # =============== Dynamic Programming (DP) ===============
@@ -3125,4 +3439,115 @@ class Solution2542:
             heapq.heappush(top_k_heap, n1)
             result = max(result, top_k_sum * n2) # n2: min of the selected elements from nums2 (bc already sorted in descending way).
         return result
+
+# 215. Kth Largest Element in an Array
+class Solution215:
+    # T: O(N) + O(KlogN)
+    # S: O(N) + O(K)
+    def findKthLargest(self, nums, k):
+        min_heap = [-n for n in nums]
+        heapq.heapify(min_heap) # TC: O(N)
+        for _ in range(k): # TC: O(K)
+            val = heapq.heappop(min_heap) # TC: O(logN)
+        return val * (-1)
+
+    # T: O(NlogN)
+    # S: O(K)
+    def findKthLargest(self, nums, k):
+        min_heap = []
+        for n in nums:
+            heapq.heappush(min_heap, n)
+            if len(min_heap) > k:
+                heapq.heappop(min_heap)
+        return min_heap[0]
+
+    # heappushpop()
+    # T: O(NlogN)
+    # S: O(K)
+    def findKthLargest(self, nums, k):
+        min_heap = nums[:k]
+        heapq.heapify(min_heap)
+        for n in nums[k:]:
+            heapq.heappushpop(min_heap, n)
+        return min_heap[0]
+        
+# 373. Find K Pairs with Smallest Sums
+class Solution373:
+    # T: O(K)
+    # S: O(K)
+    def kSmallestPairs(self, nums1, nums2, k):
+        min_heap = []
+        result = []
+        idx1 = 0
+        idx2 = 0 
+        m = len(nums1)
+        n = len(nums2)
+        heapq.heappush(min_heap, (nums1[idx1]+nums2[idx2], idx1, idx2))
+        visited = set()
+        visited.add((idx1,idx2))
+
+        while len(result) < k and min_heap:
+            total, idx1, idx2 = heapq.heappop(min_heap)
+            result.append([nums1[idx1], nums2[idx2]])
+            if idx1+1 < m and (idx1+1, idx2) not in visited:
+                heapq.heappush(min_heap, (nums1[idx1+1]+nums2[idx2], idx1+1, idx2))
+                visited.add((idx1+1, idx2))
+            if idx2+1 < n and (idx1, idx2+1) not in visited:
+                heapq.heappush(min_heap, (nums1[idx1]+nums2[idx2+1], idx1, idx2+1))
+                visited.add((idx1, idx2+1))
+        return result
+
+# 502. IPO
+class Solution502:
+    def findMaximizedCapital(self, k, w, profits, capital):
+        if w > max(capital):
+            return w + sum(heapq.nlargest(k, profits))
+        profit_max_heap = []
+        min_heap = []
+        # for c, p in zip(capital, profits):
+        #     min_heap.append((c, p))
+        # heapq.heapify(min_heap)
+        # Insert all capitals to a min-heap
+        capital_min_heap = [(capital[i], i) for i in range(len(capital))]
+        heapq.heapify(capital_min_heap)
+            
+        # Finding 'k' best projects
+        available_capital = w
+        for _ in range(k):
+            # Projects that can be selected within the available capital. Insert these in a max-heap
+            while capital_min_heap and capital_min_heap[0][0] <= available_capital:
+                needed_capital, idx = heapq.heappop(capital_min_heap)
+                heapq.heappush(profit_max_heap, (-profits[idx], idx))
+            # Break if we are not able to find any project that can be completed within the available capital
+            if not profit_max_heap:
+                break
+            # Add the profit from project with the maximum profit
+            available_capital += (-1) * heapq.heappop(profit_max_heap)[0]
+        return available_capital
+
+class MedianFinder:
+
+    def __init__(self):
+        self.small = [] # max heap
+        self.large = [] # min heap
+
+    def addNum(self, num: int) -> None:
+        if not self.small or num < self.small[0]*(-1): 
+            heapq.heappush(self.small, num*(-1))
+        else:
+            heapq.heappush(self.large, num)
+        if len(self.small) >= len(self.large)+2:
+            val = heapq.heappop(self.small)*(-1)
+            heapq.heappush(self.large, val)
+        elif len(self.small)+2 <= len(self.large):
+            val = heapq.heappop(self.large)
+            heapq.heappush(self.small, val*(-1))
+
+    def findMedian(self) -> float:
+        if len(self.small) == len(self.large):
+            return (self.small[0]*(-1) + self.large[0])/2
+        elif len(self.small) > len(self.large):
+            return self.small[0] *(-1)
+        else:
+            return self.large[0]
 
