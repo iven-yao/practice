@@ -40,8 +40,8 @@ public class q212 {
                 int i = c - 'a';
                 if (p.next[i] == null) p.next[i] = new TrieNode();
                 p = p.next[i];
-        }
-        p.word = w;
+            }
+            p.word = w;
         }
         return root;
     }

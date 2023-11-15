@@ -6,6 +6,11 @@ import java.util.Map;
 
 public class tt_oa_1106 {
     // 0 1 knap sack problem
+    // given n api endpoints
+    // each endpoint has a bandwidth needed to work
+    // each endpoint has a anticipated request number to be made
+    // given a total bandwidth could use
+    // find the possible max request under such total bandwidth
     public static long getMaxRequests(int[] bandwidth, int[] request, int total_bandwidth) {
         int n = request.length;
         long[][] dp = new long[n+1][total_bandwidth+1];
@@ -26,6 +31,10 @@ public class tt_oa_1106 {
     }
 
     // easy hash map
+    // given a sorted timestamp
+    // given a list of messages
+    // given a interval k
+    // if a message was received in last k unit, the message will be dropped (false, otherwise true)
     public static boolean[] getMessageStatus(int[] time, String[] msg, int k) {
         Map<String, Integer> lastMsg = new HashMap<>();
         boolean[] status = new boolean[msg.length];
@@ -34,7 +43,7 @@ public class tt_oa_1106 {
             int lastT = lastMsg.getOrDefault(msg[i], -1);
             if(lastT == -1) {
                 status[i] = true;
-            } else if(time[i] - lastT > k) {
+            } else if(time[i] - lastT >= k) {
                 status[i] = true;
             }
 
@@ -45,6 +54,13 @@ public class tt_oa_1106 {
     }
 
     // swap and big number multiply issue
+    // could do multiple times of swap, 
+    // [3,4,1,2] you could swap the pair that has same distance from head and tail, 
+    // which means (3,2) and (4,1) are the two pairs in this example
+    // return the efficiency, which is the sum of index(1-based) * memory
+    // try to get the max possible efficiency after swaps
+    
+    // greedy + big number
     public static int maxEfficiency(int[] memory) {
         int n = memory.length;
         int mod = 1000000000 + 7;
