@@ -9,9 +9,6 @@ public class q74 {
         while(left < right) {
             // System.out.println(1);
             int mid = (left + right)/2;
-            if(matrix[mid][0] <= target) left = mid;
-            else right = mid - 1;
-
             if(matrix[mid][n] < target) left = mid+1;
             else right = mid;
         }
@@ -25,8 +22,7 @@ public class q74 {
             int mid = (left + right)/2;
 
             if(matrix[row][mid] < target) left = mid+1;
-            else if(matrix[row][mid] > target) right = mid-1;
-            else return true;
+            else right = mid;
         }
 
         return matrix[row][left] == target;
