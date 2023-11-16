@@ -23,7 +23,7 @@ public class q373 {
             while (k > 0 && !minHeap.isEmpty()) {
                 int[] pair = minHeap.poll();
     
-                res.add(List.of(pair[0], pair[1])); // Add the pair to the result list
+                res.add(Arrays.asList(pair[0], pair[1])); // Add the pair to the result list
     
                 // If there are more elements in nums2, push the next pair into the priority queue
                 if (pair[2] < nums2.length) {
