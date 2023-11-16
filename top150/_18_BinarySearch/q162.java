@@ -2,6 +2,20 @@ package top150._18_BinarySearch;
 
 public class q162 {
     public int findPeakElement(int[] nums) {
+        int l = 0;
+        int r = nums.length -1;
+
+        while(l < r) {
+            int mid = (l+r)/2;
+
+            if(nums[mid] < nums[mid+1]) l = mid+1;
+            else r = mid;
+        }
+
+        return l;
+    }
+
+    public int findPeakElementWorse(int[] nums) {
         if(nums.length == 1) return 0;
 
         int left = 0;
