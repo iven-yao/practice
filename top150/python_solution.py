@@ -2845,8 +2845,34 @@ class Solution918:
         
     
 # =============== Binary Search (BS) ===============
-# 35. Search Insert Position
+# 278. Firs Bad Version
+class Solution278:
+    # template 1
+    def firstBadVersion(self, n):
+        l = 1
+        r = n
+        while l <= r:
+            mid = l + (r-l)//2
+            if isBadVersion(mid) == False:
+                l = mid + 1
+            else:
+                r = mid -1
+        return l
+    
+    # template 2, better bc not first return True will be the ans
+    def firstBadVersion(self, n):
+        left = 1
+        right = n
+        while left < right:
+            mid = left+(right-left)//2
+            if isBadVersion(mid) == False:
+                left = mid+1
+            else:
+                right = mid
+        return left
 
+
+# 35. Search Insert Position
 class Solution35:
     # template 1
     # T: O(logN)
@@ -2939,7 +2965,43 @@ class Solution74:
             one_d_matrix.extend(row)
         idx = bisect.bisect_left(one_d_matrix, target)
         return idx < m*n and one_d_matrix[idx] == target
+
+    # search row and search col !!!!
+    # T: O(M+N)
+    # S: O(1)
+
+ # 69. Sqrt(x)
+class Solution69:
+    # template 1
+    def mySqrt(self, x):
+        left = 0
+        right = x
+        while left <= right:
+            mid = left+(right-left)//2
+            if mid*mid == x:
+                return mid
+            elif mid*mid < x:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return right
     
+    # template 2 - modified
+    def mySqrt(self, x):
+        # for template 2 we need to process edge case x=0 like below.
+        # cannot do BS directly start from left=0 
+        if x <= 1:
+            return x
+        left = 1
+        right = x
+        while left < right:
+            mid = left+(right-left)//2
+            if mid*mid <= x: # <=, bc if we meet mid*mid == x, we want to let left = mid+1, so that when the while loop ends, the answer we return: left-1 is the final answer
+                left = mid + 1
+            else:
+                right = mid
+        return left-1
+
 class Solution2300:
     # Notice that if a spell and potion pair is successful, then the spell and all stronger potions will be successful too.
     # sort potions, and do BS
@@ -3027,6 +3089,7 @@ class Solution33:
         n = len(nums)
         left = 0
         right = n-1
+        # 1st binary search to find pivot
         while left < right:
             mid = left+(right-left)//2
             if nums[mid] >= nums[-1]:
@@ -3044,6 +3107,7 @@ class Solution33:
         right = n-1
         # shift every element to the right by n - pivot steps to reach the sorted version of nums
         shift = n-pivot
+        # 2nd binary search to find target idx (real_mid) using pivot
         while left <= right:
             mid = left+(right-left)//2
             # we now need to shift the index in the sorted nums to the left by n - pivot steps to find its corresponding index, i, in the original nums (back to original Rotated Sorted Array). 
@@ -3213,8 +3277,8 @@ class Solution34:
         return [l_idx, r_idx]
     
 
-class Solution:
-    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+class Solution4:
+    def findMedianSortedArrays(self, nums1, nums2):
         len1 = len(nums1)
         len2 = len(nums2)
          # when total length is odd, the median is the middle
@@ -3250,6 +3314,21 @@ class Solution:
         
 
 # =============== Dynamic Programming (DP) ===============
+# 70. Climbing Stairs
+class Solution70:
+    def climbStairs(self, n):
+        result = 1
+        if n == 1:
+            return result
+        a = 1
+        b = 1
+        
+        for i in range(2, n+1):
+            result = a + b
+            a = b
+            b = result
+        return result
+    
 # 198. House Robber
 class Solution198:
     # Regular DP
@@ -3281,6 +3360,20 @@ class Solution198:
             a = b
             b = c
         return c
+    
+# 139. Word Break
+# TC: O(n⋅m⋅k), Given n as the length of s, m as the length of wordDict, and k as the average length of the words in wordDict
+# SC: O(n), use an array dp of length n
+class Solution139:
+    def wordBreak(self, s, wordDict):
+        n = len(s)
+        dp = [True] + [False] * n
+        for i in range(n+1): # O(N)
+            if dp[i]:
+                for w in wordDict: # O(M)
+                    if s[i:i+len(w)] == w: # O(K)
+                        dp[i+len(w)] = True
+        return dp[-1]
 
 # 62. Unique Paths
 class Solution62:
@@ -3328,35 +3421,84 @@ class Solution62:
             result /= j
         return int(result)
 
-class Solution1143:
-    def longestCommonSubsequence(self, text1, text2):
-        len1 = len(text1)
-        len2 = len(text2)
-        dp = [[0] * (len2+1) for _ in range(len1+1)]
-        for i in range(len1):
-            for j in range(len2):
-                if text1[i] == text2[j]:
-                    dp[i+1][j+1] = dp[i][j] + 1
-                else:
-                    dp[i+1][j+1] = max(dp[i][j+1], dp[i+1][j])
-        return dp[-1][-1] 
-
 # 1143. Longest Common Subsequence
 class Solution1143:
+    # 2D DP, check from the beginning of the word to the end of the word
     # T: O(M*N), M: len of text1; N: len of text2
     # S: O(M*N)
     def longestCommonSubsequence(self, text1, text2):
         len1 = len(text1)
         len2 = len(text2)
-        dp = [[0] * (len2+1) for _ in range(len1+1)]
+        dp = [[0] * (len2+1) for _ in range(len1+1)] # dp = [[0 for _ in range(len2+1)] for _ in range(len1+1)]
         for i in range(len1):
             for j in range(len2):
                 if text1[i] == text2[j]:
                     dp[i+1][j+1] = dp[i][j] + 1
-                else:
+                else: # if this pair doesn't match, we still need to record cur longest match
                     dp[i+1][j+1] = max(dp[i][j+1], dp[i+1][j])
         return dp[-1][-1]
     
+    # 2D DP, check from the end of the word to the beginning of the word
+    # T: O(M*N), M: len of text1; N: len of text2
+    # S: O(M*N)
+    def longestCommonSubsequence(self, text1, text2):
+        len1 = len(text1)
+        len2 = len(text2)
+        dp = [[0 for _ in range(len2+1)] for _ in range(len1+1)]
+        for i in range(len1-1, -1, -1):
+            for j in range(len2-1, -1, -1):
+                if text1[i] == text2[j]:
+                    dp[i][j] = dp[i+1][j+1] + 1
+                else:
+                    dp[i][j] = max(dp[i+1][j], dp[i][j+1])
+            
+        return dp[0][0]
+
+# 300. Longest Increasing Subsequence
+class Solution300:
+    # T: O(N^2)
+    # S: O(N)
+    def lengthOfLIS(self, nums):
+        n = len(nums)
+        dp = [1] * n
+        for i in range(n):
+            for j in range(i):
+                if nums[i] > nums[j]:
+                    dp[i] = max(dp[j]+1, dp[i])
+        return max(dp)
+
+    # T: O(N^2)
+    # S: O(M), M is LIS length
+    def lengthOfLIS(self, nums):
+        n = len(nums)
+        seq = []
+        for i in range(n):
+            if not seq or nums[i] > seq[-1]:
+                seq.append(nums[i])
+            else:
+                j = 0
+                while nums[i] > seq[j]:
+                    j += 1
+                seq[j] = nums[i]
+            
+        return len(seq)
+
+# 221. Maximal Square
+class Solution221:
+    def maximalSquare(self, matrix):
+        if not matrix:
+            return 0
+        m = len(matrix)
+        n = len(matrix[0])
+        dp = [[0]*(n+1) for _ in range(m+1)]
+        max_side = 0
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j] == '1':
+                    dp[i+1][j+1] = min(dp[i][j], dp[i+1][j], dp[i][j+1]) + 1
+                    max_side = max(max_side, dp[i+1][j+1])
+        return max_side*max_side
+
 
 # =============== Bit ===============
 # 1318. Minimum Flips to Make a OR b Equal to c
@@ -3550,4 +3692,77 @@ class MedianFinder:
             return self.small[0] *(-1)
         else:
             return self.large[0]
+
+# =============== Math ===============
+# 9. Palindrome Number
+class Solution9:
+    # T: O(1)
+    # S: O(N), bc of slicing
+    def isPalindrome(self, x):
+        if x < 0:
+            return False
+        x = str(x)
+        return x == x[::-1]
+    
+    # 2 pointers
+    # T: O(N)
+    # S: O(1)
+    def isPalindrome(self, x):
+        if x < 0:
+            return False
+        x = str(x)
+        n = len(x)
+        l = 0
+        r = n-1
+        while l < r:
+            if x[l] != x[r]:
+                return False
+            else:
+                l += 1
+                r -= 1
+        return True
+    
+# 66. Plus One
+class Solution66:
+    # T: O(N)
+    # S: O(N)
+    def plusOne(self, digits):
+        digits = digits[::-1]
+        digits[0] += 1
+        n = len(digits)
+        for i in range(n):
+            if digits[i] == 10:
+                digits[i] = 0
+                if i+1 < n:
+                    digits[i+1] += 1
+                else:
+                    digits += [1]
+    
+        return digits[::-1]
+    
+    # for loop from head to end (change i to idx to iterate from end to head)
+    def plusOne(self, digits):
+        n = len(digits)
+        for i in range(n):
+            idx = n-1-i
+            if digits[idx] == 9:
+                digits[idx] = 0
+            else:
+                digits[idx] += 1
+                return digits
+    
+        return [1] + digits
+    
+    # for loop from end to head
+    def plusOne(self, digits):
+        n = len(digits)
+        for i in range(n-1, -1, -1):
+            if digits[i] == 9:
+                digits[i] = 0
+            else:
+                digits[i] += 1
+                return digits
+    
+        return [1] + digits
+
 
