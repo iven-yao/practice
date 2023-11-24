@@ -3316,6 +3316,8 @@ class Solution4:
 # =============== Dynamic Programming (DP) ===============
 # 70. Climbing Stairs
 class Solution70:
+    # T: O(N)
+    # S: O(1)
     def climbStairs(self, n):
         result = 1
         if n == 1:
@@ -3367,6 +3369,7 @@ class Solution198:
 class Solution139:
     def wordBreak(self, s, wordDict):
         n = len(s)
+        # first True is base case
         dp = [True] + [False] * n
         for i in range(n+1): # O(N)
             if dp[i]:
@@ -3420,6 +3423,39 @@ class Solution62:
         for j in range(small_num, 0, -1):
             result /= j
         return int(result)
+    
+# 63. Unique Paths II
+class Solution63:
+    # T: O(M*N)
+    # S: O(M*N)
+    def uniquePathsWithObstacles(self, obstacleGrid):
+        m = len(obstacleGrid)
+        n = len(obstacleGrid[0])
+        dp = [[1] * (n) for _ in range(m)]
+        row_zero = False
+        col_zero = False
+        for i in range(m):
+            if row_zero:
+                dp[i][0] = 0
+            if obstacleGrid[i][0] == 1:
+                row_zero = True
+                dp[i][0] = 0
+        for j in range(n):
+            if col_zero:
+                dp[0][j] = 0
+            if obstacleGrid[0][j] == 1:
+                col_zero = True
+                dp[0][j] = 0
+
+        for i in range(1, m):
+            for j in range(1, n):
+                if obstacleGrid[i][j] == 1:
+                    dp[i][j] = 0
+                else:
+                    dp[i][j] = dp[i-1][j] + dp[i][j-1]
+        return dp[-1][-1]
+
+
 
 # 1143. Longest Common Subsequence
 class Solution1143:
@@ -3454,8 +3490,9 @@ class Solution1143:
             
         return dp[0][0]
 
-# 300. Longest Increasing Subsequence
+# 300. Longest Increasing Subsequence (LIS)
 class Solution300:
+    # DP
     # T: O(N^2)
     # S: O(N)
     def lengthOfLIS(self, nums):
@@ -3467,8 +3504,9 @@ class Solution300:
                     dp[i] = max(dp[j]+1, dp[i])
         return max(dp)
 
+    # Intelligently Build a Subsequence
     # T: O(N^2)
-    # S: O(M), M is LIS length
+    # S: O(M), M is LIS length, worst case is O(N)
     def lengthOfLIS(self, nums):
         n = len(nums)
         seq = []
@@ -3482,6 +3520,41 @@ class Solution300:
                 seq[j] = nums[i]
             
         return len(seq)
+
+# 72. Edit Distance
+class Solution72:
+    def minDistance(self, word1, word2):
+        m = len(word1)
+        n = len(word2)
+        dp = [[0]*(n+1) for _ in range(m+1)]
+        for i in range(m+1):
+            dp[i][0] = i
+        for j in range(n+1):
+            dp[0][j] = j
+        for i in range(1, m+1):
+            for j in range(1, n+1):
+                if word1[i-1] == word2[j-1]:
+                    dp[i][j] = dp[i-1][j-1]
+                else:
+                    dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1
+        return dp[-1][-1]
+
+# 97. Interleaving String
+class Solution97:
+    def isInterleave(self, s1, s2, s3):
+        r, c, l = len(s1), len(s2), len(s3)
+        if r+c != l:
+            return False
+        dp = [[True for _ in range(c+1)] for _ in range(r+1)]
+        for i in range(1, r+1):
+            dp[i][0] = dp[i-1][0] and s1[i-1] == s3[i-1]
+        for j in range(1, c+1):
+            dp[0][j] = dp[0][j-1] and s2[j-1] == s3[j-1]
+        for i in range(1, r+1):
+            for j in range(1, c+1):
+                dp[i][j] = (dp[i-1][j] and s1[i-1] == s3[i-1+j]) or \
+                (dp[i][j-1] and s2[j-1] == s3[i-1+j])
+        return dp[-1][-1]
 
 # 221. Maximal Square
 class Solution221:
@@ -3498,6 +3571,96 @@ class Solution221:
                     dp[i+1][j+1] = min(dp[i][j], dp[i+1][j], dp[i][j+1]) + 1
                     max_side = max(max_side, dp[i+1][j+1])
         return max_side*max_side
+
+# 1372. Longest ZigZag Path in a Binary Tree
+class Solution1372:
+    # DFS
+    # T: O(N)
+    # S: O(N), recursion stack
+    def longestZigZag(self, root: Optional[TreeNode]) -> int:
+        
+        def dfs(node, left, right):
+            if not node:
+                return
+            
+            nonlocal result
+            result = max(result, max(left, right))
+            if node.left: # go left
+                dfs(node.left, right+1, 0)
+            if node.right: # go right
+                dfs(node.right, 0, left+1)
+        
+        result = 0
+        if not root:
+            return result
+        # dfs(root.left, 1, 0)
+        # dfs(root.right, 0, 1)
+        dfs(root, 0, 0)
+ 
+        return result
+    
+# 123. Best Time to Buy and Sell Stock III
+class Solution123:
+    def maxProfit(self, prices):
+        if len(prices) <= 1:
+            return 0
+
+        left_min = prices[0]
+        right_max = prices[-1]
+
+        length = len(prices)
+        left_profits = [0] * length
+        right_profits = [0] * (length + 1)
+
+        # bidirectional DP
+        for l in range(1, length):
+            left_profits[l] = max(left_profits[l-1], prices[l] - left_min)
+            left_min = min(left_min, prices[l])
+
+            r = length - 1 - l
+            right_profits[r] = max(right_profits[r+1], right_max - prices[r])
+            right_max = max(right_max, prices[r])
+
+        max_profit = 0
+        for i in range(0, length):
+            max_profit = max(max_profit, left_profits[i] + right_profits[i+1])
+
+        return max_profit
+
+# 188. Best Time to Buy and Sell Stock IV
+class Solution188:
+    def maxProfit(self, k: int, prices: List[int]) -> int:
+        n = len(prices)
+
+        # solve special cases
+        if not prices or k==0:
+            return 0
+
+        if k // 2 > n:
+            res = 0
+            for i, j in zip(prices[1:], prices[:-1]):
+                res += max(0, i - j)
+            return res
+
+        # dp[i][used_k][ishold] = balance
+        # ishold: 0 nothold, 1 hold
+        dp = [[[-math.inf]*2 for _ in range(k+1)] for _ in range(n)]
+
+        # set starting value
+        dp[0][0][0] = 0
+        dp[0][1][1] = -prices[0]
+
+        # fill the array
+        for i in range(1, n):
+            for j in range(k+1):
+                # transition equation
+                dp[i][j][0] = max(dp[i-1][j][0], dp[i-1][j][1]+prices[i])
+                # you can't hold stock without any transaction
+                if j > 0:
+                    dp[i][j][1] = max(dp[i-1][j][1], dp[i-1][j-1][0]-prices[i])
+
+        res = max(dp[n-1][j][0] for j in range(k+1))
+        return res
 
 
 # =============== Bit ===============
@@ -3765,4 +3928,43 @@ class Solution66:
     
         return [1] + digits
 
+
+class Solution:
+    #  Recursion, negative case be processed "outside" the helper func
+    def myPow(self, x, n):
+        def pow(x, n):
+            if n == 0:
+                return 1.0
+            if n % 2 == 0:
+                return pow(x*x, n//2) # ??? why write: x**2 will overflow?
+            else:
+                # return pow(x, n-1) * x
+                # optimize:
+                return pow(x*x, (n-1)//2) * x
+        
+        if n == 0:
+            return 1
+        elif n > 0:
+            return pow(x, n)
+        else:
+            return 1/pow(x, n*(-1))
+    
+    # Recursion, negative case be processed "inside" the helper func
+    def myPow(self, x, n):
+        def pow(x, n):
+            print(x, n)
+            if n == 0:
+                return 1.0
+            if n < 0:
+                return pow(1/x, -n)
+            elif n % 2 == 0:
+                return pow(x*x, n//2)
+            else:
+                # return pow(x, n-1) * x
+                # optimize:
+                return pow(x*x, (n-1)//2) * x
+        
+        return pow(x, n)
+
+        
 
