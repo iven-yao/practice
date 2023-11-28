@@ -2972,7 +2972,17 @@ class Solution74:
 
  # 69. Sqrt(x)
 class Solution69:
-    # template 1
+    # naive
+    # T: O(N)
+    # S: O(1)
+    def mySqrt(self, x):
+        for i in range(x+1):
+            if i*i == x:
+                return i
+            elif i*i > x:
+                return i-1
+
+    # template 1 (BETTER)
     def mySqrt(self, x):
         left = 0
         right = x
@@ -3363,6 +3373,24 @@ class Solution198:
             b = c
         return c
     
+class Solution120:
+    def minimumTotal(self, triangle):
+        n = len(triangle)
+        if n == 1:
+            return triangle[0][0]
+        dp = [[0] * i for i in range(1, n+1)]
+        dp[0][0] = triangle[0][0]
+        for i in range(1, n):
+            for j in range(i+1):
+                if j == 0:
+                    dp[i][j] = dp[i-1][j] + triangle[i][j]
+                elif j == i:
+                    dp[i][j] = dp[i-1][j-1] + triangle[i][j]
+                else:
+                    dp[i][j] = min(dp[i-1][j-1], dp[i-1][j]) + triangle[i][j]
+        return min(dp[-1])
+
+
 # 139. Word Break
 # TC: O(n⋅m⋅k), Given n as the length of s, m as the length of wordDict, and k as the average length of the words in wordDict
 # SC: O(n), use an array dp of length n
@@ -3377,6 +3405,24 @@ class Solution139:
                     if s[i:i+len(w)] == w: # O(K)
                         dp[i+len(w)] = True
         return dp[-1]
+
+# 64. Minimum Path Sum
+class Solution:
+    def minPathSum(self, grid):
+        m = len(grid)
+        n = len(grid[0])
+        dp = [[0] * n for _ in range(m)]
+        dp[0][0] = grid[0][0]
+        for j in range(1, n):
+            dp[0][j] = dp[0][j-1] + grid[0][j]
+        for i in range(1, m):
+            dp[i][0] = dp[i-1][0] + grid[i][0]
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = min(dp[i-1][j], dp[i][j-1]) + grid[i][j]
+        return dp[-1][-1]
+
+
 
 # 62. Unique Paths
 class Solution62:
@@ -3521,8 +3567,49 @@ class Solution300:
             
         return len(seq)
 
+# 5. Longest Palindromic Substring
+class Solution5:
+    # DP
+    # T: O(N^2)
+    # S: O(N^2)
+    # [b, a, b, a, d]
+    '''
+    b a b a d
+    b T
+    a F T
+    b T F T
+    a F T F T
+    d F F F F T
+    '''
+    # (row, col) = (3, 1) => s[1:3+1]
+
+    # Expand From Centers
+    # T: O(N^2)
+    # s: O(1)
+    def longestPalindrome(self, s):
+        result = ""
+        def expand(l, r):
+            while l >= 0 and r < len(s) and s[l] == s[r]:
+                l -= 1
+                r += 1
+            return s[l+1:r]
+
+        for i in range(len(s)):
+            odd_pali = expand(i, i)
+            if len(odd_pali) > len(result):
+                result = odd_pali
+
+            even_pali = expand(i, i+1)
+            if len(even_pali) > len(result):
+                result = even_pali
+        
+        return result
+    
+
+
 # 72. Edit Distance
 class Solution72:
+    # convert word 1 to word2
     def minDistance(self, word1, word2):
         m = len(word1)
         n = len(word2)
@@ -3531,6 +3618,19 @@ class Solution72:
             dp[i][0] = i
         for j in range(n+1):
             dp[0][j] = j
+        # word1 = abc; word2 = aqc => ans = 1
+        # !!!! only operate on word1 !!!!!
+        '''
+                "" "a" "aq" "aqc" (WORD2)
+        ""      0   1    2    3 (-> add ch in word1)
+        "a"     1   0    1    2
+        "ab"    2   1    1    2
+        "abc"   3   2    2    1
+                (up to down: delete ch in word1)
+        (WORD1)
+        '''
+        # INSERT word in word1 (->), DELETE word in word1 (up to down)
+        # REPLACE in word 1 (diagonal)
         for i in range(1, m+1):
             for j in range(1, n+1):
                 if word1[i-1] == word2[j-1]:
@@ -3558,6 +3658,10 @@ class Solution97:
 
 # 221. Maximal Square
 class Solution221:
+    # T: O(M*N)
+    # S: O(M*N)
+    # dp(i,j) represents the side length of the maximum square whose bottom right corner is the cell with index (i,j) in the original matrix.
+    # dp(i,j) = min⁡( dp(i−1, j), dp(i−1, j−1), dp(i, j−1)) + 1
     def maximalSquare(self, matrix):
         if not matrix:
             return 0
@@ -3664,6 +3768,137 @@ class Solution188:
 
 
 # =============== Bit ===============
+'''
+# XOR: a^b = 0 when a == b
+print(1^2) # 3
+print(2^2) # 0
+print(1^2^2) # 1
+
+# left shift
+print(1<<0) #   1 => 1 (1*2^0)
+print(1<<1) #  10 => 2 (1*2^1)
+print(1<<2) # 100 => 4 (1*2^2)
+# right shift
+print(100>>1) # 50 (100/(2^1))
+
+modulo operation:
+1. n % 2
+2. bit AND operation (n & 1)
+'''
+
+# 67. Add Binary
+class Solution67:
+    def addBinary(self, a, b):
+        carry = 0
+        len_a = len(a)
+        len_b = len(b)
+        i = len_a - 1 # iterate from the end of integer to the beginning of the integer
+        j = len_b - 1
+        result = ''
+        while i >= 0 or j >= 0 or carry:
+            if i >= 0:
+                carry += int(a[i])
+            if j >= 0:
+                carry += int(b[j])
+            result += str(carry%2)
+            carry //= 2 # floor division
+            i -= 1
+            j -= 1
+        return result[::-1]
+
+# 190. Reverse Bits
+class Solution190:
+    # T: O(1), although while loop, the while loop run at most 32 times
+    # S: O(1)
+    def reverseBits(self, n):
+        power = 31
+        result = 0
+        while n:
+            result += (n & 1) << power
+            n >>= 1 # right shift
+            power -= 1
+        return result
+    
+# 191. Number of 1 Bits
+class Solution191:
+    def hammingWeight(self, n):
+        count = 0
+        while n:
+            count += n & 1
+            n >>= 1
+        return count
+
+# 136. Single Number
+class Solution136:
+    # T: O(N)
+    # S: O(1)
+    def singleNumber(self, nums):
+        result = 0
+        for n in nums:
+            result ^= n
+        return result
+
+# 137. Single Number II
+class Solution137:
+    # T: O(N)
+    # S: O(N)
+    def singleNumber(self, nums):
+        d = collections.Counter(nums)
+        for key, val in d.items():
+            if val == 1:
+                return key
+
+# 201. Bitwise AND of Numbers Range
+class Solution201:
+    # Bit Shift
+    # IDEA: after the AND operation on all the numbers, the remaining part of bit strings is the common prefix of all these bit.
+    # T: O(1), the number of iterations is bounded by the number of bits that an integer has (fixed).
+    # S: O(1)
+    ''' left = 20, right = 23
+    20: 10100
+    21: 10101
+    22: 10110
+    23: 10111
+    common prefix = 101, shift = 2 => result = 10100
+    '''
+    def rangeBitwiseAnd(self, left, right):
+        shift = 0
+        while left < right: # find the common 1-bits
+            left >>= 1
+            right >>= 1
+            shift += 1
+        # after the while loop ends, left == right == the common prefix
+        return right << shift # == left << shift
+
+    # Brian Kernighan's algorithm: turn off the rightmost bit of one in a number.
+    # IDEA: By applying Brian Kernighan's algorithm, we turn off the bits that lie on the right side of the common prefix, from the ending number right.
+    # T: O(1), the number of iterations is bounded by the number of bits in an integer number, which is constant.
+    # Though having the same asymptotic complexity as the previous bit shift approach, Brian Kernighan's algorithm requires fewer iterations, since it skips all the zero bits in between.
+    # S: O(1)
+    ''' left = 2, right = 7
+    2:  10
+    3:  11
+    4: 100
+    5: 101
+    6: 110
+    7: 111
+    common prefix = 0 => result = 0
+    '''
+    def rangeBitwiseAnd(self, left, right):
+        while left < right:
+            right = right & (right-1)
+            '''
+            left right
+              2    6
+              2    4
+              2    0
+            '''
+        # after the while loop ends, left >= right, and right is the common prefix
+        # Ex: left = 2, right = 7 => left = 2, right = 0
+        # Ex: left = 5, right = 7 => left = 2, right = 5
+        return left & right # == right & right
+
+
 # 1318. Minimum Flips to Make a OR b Equal to c
 class Solution1318:
     # regular operation
@@ -3900,6 +4135,8 @@ class Solution66:
                     digits[i+1] += 1
                 else:
                     digits += [1]
+            else: # optimization: return directly if already add 1
+                return digits[::-1]
     
         return digits[::-1]
     
@@ -3912,7 +4149,7 @@ class Solution66:
                 digits[idx] = 0
             else:
                 digits[idx] += 1
-                return digits
+                return digits # optimization: return directly if already add 1
     
         return [1] + digits
     
@@ -3928,9 +4165,51 @@ class Solution66:
     
         return [1] + digits
 
-
-class Solution:
-    #  Recursion, negative case be processed "outside" the helper func
+'''
+dividend / divisor = quotient
+divisible
+'''
+# 172. Factorial Trailing Zeroes
+class Solution172:
+    # T: O(N)
+    # S: O(1)
+    def trailingZeroes(self, n):
+        count = 0
+        for i in range(5, n+1, 5): # T: O(N)
+            divisor = 5
+            # count how many times 5 is a factor. 
+            # T: O(1)
+            # It might look like we do a, O(log⁡ n) operation to count the number of fives
+            # it actually amortizes to O(1), because the vast majority of numbers checked only contain a single factor of 5. 
+            while i % divisor == 0: 
+                count += 1
+                divisor *= 5
+        return count
+    
+    # T: O(logN)
+    # S: O(1)
+    def trailingZeroes(self, n):
+        count = 0
+        divisor = 5
+        while divisor <= n: # T: O(logN), base is 5
+            count += n//divisor
+            divisor = divisor*5
+        return count
+    
+    # T: O(logN)
+    # S: O(1)
+    def trailingZeroes(self, n):
+        count = 0
+        while n > 0: # T: O(logN), base is 5
+            count += n//5
+            n //= 5
+        return count
+    
+# 50. Pow(x, n)
+class Solution50:
+    # Recursion, negative case be processed "outside" the helper func
+    # T: O(logN)
+    # S: O(logN)
     def myPow(self, x, n):
         def pow(x, n):
             if n == 0:
@@ -3950,6 +4229,8 @@ class Solution:
             return 1/pow(x, n*(-1))
     
     # Recursion, negative case be processed "inside" the helper func
+    # T: O(logN)
+    # S: O(logN)
     def myPow(self, x, n):
         def pow(x, n):
             print(x, n)
@@ -3966,5 +4247,108 @@ class Solution:
         
         return pow(x, n)
 
-        
+    # no helper function, recursively call itself
+    # T: O(logN)
+    # S: O(logN)
+    def myPow(self, x, n):
+        if n == 0:
+            return 1
+        if n < 0:
+            return self.myPow(1/x, n*(-1))
+        if n % 2 == 0:
+            return self.myPow(x*x, n//2)
+        else:
+            return self.myPow(x*x, (n-1)//2) * x
+
+    # Iteration
+    # T: O(logN)
+    # S: O(1)
+    def myPow(self, x, n):
+        if n == 0:
+            return 1
+        if n < 0:
+            n = n*(-1)
+            x = 1/x
+        result = 1
+        while n != 0:
+            if n % 2 == 1:
+                result *= x
+                n -= 1
+            n //= 2
+            x *= x
+        return result
+'''
+Check Prime: Sieve of Eratosthenes
+'''
+# 204. Count Primes
+class Solution204:
+    # Sieve of Eratosthenes
+    # T: O(N + N^0.5*loglogN)
+    # S: O(N)
+    def countPrimes(self, n):
+        if n <= 1:
+            return 0
+        primes = [True] * n
+        # idx 1 means: if 1 is a prime
+        # we only need idx 0~n-1
+        # bc problem said: the number of prime numbers that are strictly less than n.
+        primes[0] = False
+        primes[1] = False
+        p = 2
+        while p*p <= n: 
+            # Each time we hit a prime, we "cross out" the multiples of that prime because we know they aren't prime.
+            if primes[p] == True: # T: O(N^0.5)
+                # Below is bounded by O(log⁡log⁡n)
+                for i in range(p*p, n, p):
+                    primes[i] = False
+            p += 1
+        return sum(primes) # T: O(N)
+
+# 2761. Prime Pairs With Target Sum
+class Solution2761:
+    # T: O(N+N^0.5*loglogN)
+    # S: O(N)
+    def findPrimePairs(self, n):
+        result = []
+        if n <= 1:
+            return result
+        primes = [True] * (n+1)
+        # idx 1 means: if 1 is a prime
+        # we only need idx 0~n-1
+        primes[0] = False
+        primes[1] = False
+        p = 2
+        while p*p <= n:
+            if primes[p] == True:
+                for i in range(p*p, n+1, p):
+                    primes[i] = False
+            p += 1
+        for i in range(1, n//2+1): # until n//2+1 to prevent duplicated pairs
+            if primes[i] == True and primes[n-i] == True:
+                result.append([i, n-i])
+        return result
+
+# 149. Max Points on a Line
+class Solution149:
+    # T: O(N^2)
+    # S: O(N)
+    def maxPoints(self, points):
+        def count_slope(a, b):
+            if a[0] == b[0]:
+                return 'inf'
+            else:
+                return (b[1]-a[1]) / (b[0]-a[0])
+
+        n = len(points)
+        result = 0
+        # need to write n-1, but NOT n, bc at least 2 points (one slope) in d so that d will be vaild one for following func: max(d.values())
+        # if we write n here, we need to add one check condition: if len(d) != 0: to prevent empty d
+        for i in range(n-1): 
+            d = defaultdict(int)
+            for j in range(i+1, n):
+                slope = count_slope(points[i], points[j])
+                d[slope] += 1
+            # if len(d) != 0:
+            result = max(result, max(d.values()))
+        return result+1
 
