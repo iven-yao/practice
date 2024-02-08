@@ -21,19 +21,20 @@ public class Node {
     }
     
     public void printNAryTree(){
-        if(this == null) return;
-        Queue<Node> queue = new LinkedList<>();
-        queue.offer(this);
-        while(!queue.isEmpty()) {
-            int len = queue.size();
-            for(int i=0;i<len;i++) { // so that we can reach each level
-                Node node = queue.poll();
-                System.out.print(node.val + " ");
-                for (Node item : node.children) { // for-Each loop to iterate over all childrens
-                    queue.offer(item);
+        if(this != null) {
+            Queue<Node> queue = new LinkedList<>();
+            queue.offer(this);
+            while(!queue.isEmpty()) {
+                int len = queue.size();
+                for(int i=0;i<len;i++) { // so that we can reach each level
+                    Node node = queue.poll();
+                    System.out.print(node.val + " ");
+                    for (Node item : node.children) { // for-Each loop to iterate over all childrens
+                        queue.offer(item);
+                    }
                 }
+                System.out.println();
             }
-            System.out.println();
         }
     }
 }
