@@ -5,7 +5,7 @@ class MaxHeap {
     Queue<Integer> pQueue;
 
     public MaxHeap() {
-        pQueue = new PriorityQueue<Integer>((a,b)->Integer.compare(b,a));
+        pQueue = new PriorityQueue<Integer>((a,b)->b-a);
     }
 
     public void add(Integer i) {
