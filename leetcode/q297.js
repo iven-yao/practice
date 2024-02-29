@@ -4,7 +4,6 @@ function TreeNode(val) {
     this.left = this.right = null;
 }
 
-
 /**
  * Encodes a tree to a single string.
  *
@@ -56,3 +55,5 @@ var decode = function(data_arr) {
  * Your functions will be called as such:
  * deserialize(serialize(root));
  */
+
+serialize(deserialize("1,2,3,X,4,X,X,5,6,7,8,X,X,X,X"))

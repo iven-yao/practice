@@ -33,3 +33,5 @@ var judgePoint24 = function(cards) {
 
     return res;
 };
+
+console.log(judgePoint24([1,2,3,4]))
