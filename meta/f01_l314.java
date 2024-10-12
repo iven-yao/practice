@@ -4,29 +4,7 @@ import java.util.*;
 
 import node_definition.TreeNode;
 
-public class f1_l314 {
-
-    private static String resultBuilder(List<List<Integer>> list) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for(int j = 0; j < list.size(); j++) {
-            List<Integer> l = list.get(j);
-            sb.append("[");
-            for(int i = 0 ; i < l.size(); i++) {
-                sb.append(l.get(i));
-                if(i != l.size() - 1) {
-                    sb.append(",");
-                }
-            }
-            sb.append("]");
-            if(j != list.size() - 1) {
-                sb.append(",");
-            }
-        }
-        sb.append("]");
-
-        return sb.toString();
-    }
+public class f01_l314 {
 
     public List<List<Integer>> verticalOrder(TreeNode root) {
         if(root == null) return new ArrayList<>();
@@ -68,9 +46,32 @@ public class f1_l314 {
         return res;
     }
 
+    private static String resultBuilder(List<List<Integer>> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for(int j = 0; j < list.size(); j++) {
+            List<Integer> l = list.get(j);
+            sb.append("[");
+            for(int i = 0 ; i < l.size(); i++) {
+                sb.append(l.get(i));
+                if(i != l.size() - 1) {
+                    sb.append(",");
+                }
+            }
+            sb.append("]");
+            if(j != list.size() - 1) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+
+        return sb.toString();
+    }
+
+
     public static void test(TreeNode input, String expected) {
         
-        f1_l314 sol = new f1_l314();
+        f01_l314 sol = new f01_l314();
         System.out.println("Input:    "+ (input == null ? "[]":input.toString()));
         String res = resultBuilder(sol.verticalOrder(input));
         System.out.println("Output:   " + res);
