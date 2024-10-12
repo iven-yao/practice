@@ -30,14 +30,14 @@ public class TreeNode {
 
     public String toStringHelper() {
         StringBuilder sb = new StringBuilder();
-        sb.append("[ ");
+        sb.append("[");
         List<TreeNode> currLevel = new ArrayList<>();
         currLevel.add(this);
         while(currLevel.size() != 0) {
             List<TreeNode> nextLevel = new ArrayList<>();
             int nullCount = 0;
             for(TreeNode node: currLevel) {
-                sb.append((node == null? "null":node.val)+", ");
+                sb.append((node == null? "null":node.val)+",");
                 if(node == null) {
                     nextLevel.add(null);
                     nextLevel.add(null);
@@ -55,7 +55,7 @@ public class TreeNode {
             }
         }
 
-        sb.replace(sb.length()-2, sb.length(), " ]");
+        sb.replace(sb.length()-1, sb.length(), "]");
         return sb.toString();
     }
 

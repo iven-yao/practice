@@ -1,0 +1,14 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: black;
+    opacity: 0.7;
+    transition: opacity 1s linear;
+}
+
+.modal-overlay-hidden {
+    opacity: 0;
+}
