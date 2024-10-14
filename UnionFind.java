@@ -1,4 +1,7 @@
 // UnionFind.class
+
+import java.util.Arrays;
+
 public class UnionFind {
     private int[] root;
     // Use a rank array to record the height of each vertex, i.e., the "rank" of each vertex.
@@ -19,7 +22,8 @@ public class UnionFind {
         if (x == root[x]) {
             return x;
         }
-        return root[x] = find(root[x]);
+        root[x] = find(root[x]);
+        return root[x];
     }
 
 	// The union function with union by rank
@@ -36,6 +40,12 @@ public class UnionFind {
                 rank[rootX] += 1;
             }
         }
+        print();
+    }
+
+    public void print() {
+        System.out.println("root: " + Arrays.toString(root));
+        System.out.println("rank: " + Arrays.toString(rank));
     }
 
     public boolean connected(int x, int y) {
@@ -46,8 +56,8 @@ public class UnionFind {
         UnionFind uf = new UnionFind(10);
         // 1-2-5-6-7 3-8-9 4
         uf.union(1, 2);
-        uf.union(2, 5);
         uf.union(5, 6);
+        uf.union(2, 5);
         uf.union(6, 7);
         uf.union(3, 8);
         uf.union(8, 9);
